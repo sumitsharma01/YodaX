@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YodaX — Stock forecasts</title>
+    <meta
+      name="description"
+      content="Explore stock forecasts and their daily track record. Local TimesFM stock forecasting application."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c8f675'/%3E%3Cpath d='M8 8l8 10 8-10M16 18v7' fill='none' stroke='%23131716' stroke-width='4'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="#"
+        ><span class="brand-icon">Y</span> Yoda<span class="lime">X</span></a
+      >
+      <div class="workspace">YOUR MARKET VIEW</div>
+      <nav aria-label="Main navigation">
+        <button class="nav active" aria-label="Overview" data-view="overview">
+          ◈ <span>Overview</span></button
+        ><button
+          class="nav"
+          aria-label="Tomorrow’s forecast"
+          data-view="tomorrow"
+        >
+          ↗ <span>Tomorrow</span></button
+        ><button class="nav" aria-label="Track record" data-view="performance">
+          ▥ <span>Track record</span></button
+        ><button class="nav" aria-label="Methodology" data-view="methodology">
+          ⌘ <span>Methodology</span>
+        </button>
+      </nav>
+      <div class="side-bottom">
+        <div class="model-icon">✳</div>
+        <strong>A little foresight.</strong>
+        <p>A measurable track record.</p>
+        <div class="profile">
+          <span>YX</span>
+          <div>YodaX<small>Daily stock forecasts</small></div>
+        </div>
+      </div>
+    </aside>
+    <div class="shell">
+      <header>
+        <span>Workspace <b>/</b> <span id="breadcrumb">Overview</span></span>
+        <div class="header-tools">
+          <label for="currency">Currency</label
+          ><select id="currency" aria-label="Display currency">
+            <option value="USD">USD · $</option>
+            <option value="INR">INR · ₹</option>
+            <option value="EUR">EUR · €</option>
+            <option value="GBP">GBP · £</option>
+            <option value="JPY">JPY · ¥</option>
+            <option value="CAD">CAD · C$</option></select
+          ><span class="demo-badge">Loading forecasts</span>
+        </div>
+      </header>
+      <main>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">MARKET OUTLOOK</div>
+            <h1 id="page-title">A clearer view of what’s next.</h1>
+            <p id="page-description">
+              Explore tomorrow’s possibilities. Measure today’s results.
+            </p>
+          </div>
+          <div class="asof">
+            Latest completed session<strong>Loading…</strong>
+          </div>
+        </div>
+        <p id="currency-note" class="muted" hidden></p>
+        <div class="notice"><span>◉</span> Loading your forecasts…</div>
+        <div id="evaluation-control" hidden>
+          <label for="evaluation-scope">Show</label>
+          <select id="evaluation-scope">
+            <option value="prospective">Published predictions</option>
+            <option value="historical">Historical tests</option>
+          </select>
+        </div>
+        <section id="overview" hidden>
+          <div class="dashboard-grid">
+            <section class="panel universe">
+              <div class="panel-heading">
+                <h2>Companies</h2>
+                <span class="count">06</span>
+              </div>
+              <label class="search"
+                ><span>⌕</span
+                ><input
+                  id="search"
+                  type="search"
+                  placeholder="Search company or ticker"
+                  aria-label="Search company or ticker"
+              /></label>
+              <div class="list-label">
+                <span>COMPANY</span><span>LAST CLOSE</span>
+              </div>
+              <div id="stock-list"></div>
+              <p class="list-footer">
+                Select a company to explore its forecast.
+              </p>
+            </section>
+            <section class="panel forecast">
+              <div class="stock-heading">
+                <div class="stock-identity">
+                  <span id="selected-logo" class="company-logo"></span>
+                  <div>
+                    <h2 id="selected-name"></h2>
+                    <span id="selected-ticker" class="muted"></span>
+                  </div>
+                </div>
+                <span class="pill">DAILY FORECAST</span>
+              </div>
+              <div class="price-row">
+                <div>
+                  <span class="muted">Last closing price</span>
+                  <div class="big-price" id="selected-price"></div>
+                </div>
+                <div class="forecast-price">
+                  <span class="muted">Next session estimate</span
+                  ><strong id="predicted-price"></strong
+                  ><span id="predicted-move"></span>
+                </div>
+              </div>
+              <div class="chart-toolbar">
+                <div class="legend">
+                  <span><i class="actual"></i>Historical close</span
+                  ><span><i class="predicted"></i>Forecast</span
+                  ><span class="interval-key">Estimated range</span>
+                </div>
+                <div class="segmented" aria-label="Chart history">
+                  <button data-range="21" class="active">1M</button
+                  ><button data-range="63">3M</button
+                  ><button data-range="126">6M</button>
+                </div>
+              </div>
+              <div class="chart-wrap">
+                <svg
+                  id="price-chart"
+                  viewBox="0 0 800 255"
+                  role="img"
+                  aria-label="Historical closing prices and next-session forecast"
+                ></svg>
+              </div>
+              <div class="forecast-footer">
+                <span>Forecast for <strong>—</strong></span
+                ><span id="range-label"></span>
+              </div>
+            </section>
+          </div>
+          <section class="panel ledger">
+            <div class="panel-heading">
+              <div>
+                <h2>How close were we?</h2>
+                <p>Recent results for <span id="ledger-company"></span></p>
+              </div>
+              <button class="text-button" id="view-record">
+                Explore track record ↗
+              </button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>TARGET SESSION</th>
+                    <th>PREDICTED CLOSE</th>
+                    <th>ACTUAL CLOSE</th>
+                    <th>DIFFERENCE</th>
+                    <th>DIRECTION</th>
+                    <th>SCORE / 100</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-rows"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+        <section id="tomorrow" hidden>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>
+                  Tomorrow’s forecast
+                  <span id="tomorrow-date" class="lime"></span>
+                </h2>
+                <p>Predicted closing prices for the next trading day.</p>
+              </div>
+              <span class="pill">NEXT TRADING DAY</span>
+            </div>
+            <div id="tomorrow-cards" class="tomorrow-grid"></div>
+          </section>
+          <div class="results-note">
+            Results available after market close. We’ll compare each prediction
+            with the actual closing price.
+          </div>
+        </section>
+        <section id="performance" hidden>
+          <div id="results-summary" class="results-note"></div>
+          <section class="panel ledger">
+            <div class="panel-heading">
+              <div>
+                <h2>Predicted vs. actual</h2>
+                <p id="ledger-description">
+                  Historical evaluations and prospective forecasts are kept
+                  separate.
+                </p>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>COMPANY / SESSION</th>
+                    <th>PREDICTED CLOSE</th>
+                    <th>ACTUAL CLOSE</th>
+                    <th>DIFFERENCE</th>
+                    <th>DIRECTION</th>
+                    <th>SCORE / 100</th>
+                  </tr>
+                </thead>
+                <tbody id="all-rows"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+        <section id="methodology" hidden>
+          <p class="muted">
+            Optional details about our forecasts, scoring, and learning process.
+          </p>
+          <p id="run-details" class="muted"></p>
+          <div class="metrics">
+            <article>
+              <span>Stocks in your universe</span
+              ><strong>6 <small>US equities</small></strong>
+              <p>One market. Multiple perspectives.</p>
+            </article>
+            <article>
+              <span>Mean absolute return error</span><strong id="mae">—</strong>
+              <p id="metric-count">Loading evaluations</p>
+            </article>
+            <article>
+              <span>Direction accuracy</span><strong id="direction">—</strong>
+              <p id="direction-detail"></p>
+            </article>
+            <article>
+              <span>Compared with no-change</span
+              ><strong id="baseline">—</strong>
+              <p>Return error versus the baseline</p>
+            </article>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Prediction error by company</h2>
+                <p id="evaluation-description">
+                  Mean absolute return error · lower is better
+                </p>
+              </div>
+              <div class="legend">
+                <span><i class="predicted"></i>Model</span
+                ><span><i class="actual"></i>No-change baseline</span>
+              </div>
+            </div>
+            <div id="error-bars"></div>
+          </div>
+          <section class="panel ledger">
+            <div class="panel-heading">
+              <div>
+                <h2>The learning loop</h2>
+                <p>
+                  Forecast → observe the close → score the miss → update the
+                  next forecast
+                </p>
+              </div>
+              <span class="pill">EXPERIMENTAL</span>
+            </div>
+            <div class="learning-explainer">
+              <p>
+                <strong>Adaptive blend:</strong> TimesFM, no-change, and
+                bias-corrected TimesFM. Better performers gain relative weight;
+                large mistakes lose weight. TimesFM’s pretrained weights stay
+                frozen.
+              </p>
+              <p>
+                <strong>Score:</strong> 100 / (1 + z²), where z is the return
+                error divided by prior 20-session volatility (minimum 0.5%). A
+                perfect prediction scores 100; a one-volatility miss scores 50.
+                This is a quality index, not a probability or “percent correct.”
+              </p>
+              <p>
+                <strong>Reward:</strong> baseline squared error − forecast
+                squared error, both volatility-normalized. Positive beats
+                no-change; negative earns a penalty. Direction accuracy is
+                reported separately.
+              </p>
+              <p id="learning-summary"></p>
+            </div>
+            <div id="learning-weights"></div>
+          </section>
+          <section class="panel ledger">
+            <div class="panel-heading">
+              <div>
+                <h2>Daily scores</h2>
+                <p>
+                  Average quality score across settled stocks for each target
+                  session
+                </p>
+              </div>
+            </div>
+            <div id="daily-scores" class="learning-explainer"></div>
+          </section>
+          <section class="panel ledger">
+            <div class="panel-heading">
+              <div>
+                <h2>Daily forecast report card</h2>
+                <p>
+                  Settled adaptive predictions only · scores appear after the
+                  daily job observes actual prices
+                </p>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>STOCK / SESSION</th>
+                    <th>ADAPTIVE / ACTUAL</th>
+                    <th>MISS (PRED − ACTUAL)</th>
+                    <th>SCORE / 100</th>
+                    <th>REWARD / PENALTY</th>
+                  </tr>
+                </thead>
+                <tbody id="learning-ledger"></tbody>
+              </table>
+            </div>
+          </section>
+          <div class="method-grid">
+            <article class="panel method">
+              <div class="eyebrow">01 / THE QUESTION</div>
+              <h2>One trading session ahead.</h2>
+              <p>
+                Given the information available after today’s market close,
+                estimate the next trading session’s closing price.
+              </p>
+              <p>
+                The job uses the US exchange calendar, excludes unfinished
+                sessions, and waits an hour after close. Inputs use Yahoo
+                closing prices; recent split targets are rejected for review.
+              </p>
+            </article>
+            <article class="panel method">
+              <div class="eyebrow">02 / THE MODEL</div>
+              <h2>TimesFM, with a benchmark.</h2>
+              <p>
+                TimesFM 2.5 runs locally in a separate Python job. Every
+                forecast will be compared with a simple no-change baseline:
+                tomorrow’s close equals today’s.
+              </p>
+              <p>
+                The model uses 256 completed closing prices to predict one
+                session ahead. Shading shows its 10th–90th quantiles; coverage
+                is not calibrated or guaranteed.
+              </p>
+            </article>
+            <article class="panel method">
+              <div class="eyebrow">03 / THE MEASUREMENT</div>
+              <h2>Results you can inspect.</h2>
+              <p>
+                Absolute return error = |predicted close − actual close| ÷
+                previous close × 100, measured in percentage points.
+              </p>
+              <p>
+                Direction accuracy compares the signs of predicted and actual
+                changes. Scores are calculated from actual model outputs and
+                observed closes. The evaluation selector separates retrospective
+                tests from prospective results.
+              </p>
+            </article>
+            <article class="panel method">
+              <div class="eyebrow">04 / THE RECORD</div>
+              <h2>Publish. Preserve. Evaluate.</h2>
+              <p>
+                Saved forecasts retain their generation time, target session,
+                checkpoint revision, and input snapshot hash. Reruns do not
+                overwrite predictions; they score pending outcomes.
+              </p>
+              <p>
+                The Tomorrow section includes an experimental adaptive blend. It
+                learns only from scored prospective records, and is compared
+                against the unchanged raw TimesFM forecast. Improvement is not
+                guaranteed.
+              </p>
+              <p>
+                Historical tests use data downloaded today and may contain
+                provider revisions or pretraining overlap. They are not
+                point-in-time backtests or evidence of trading profitability.
+                Yahoo data is used for local personal research.
+              </p>
+            </article>
+          </div>
+        </section>
+        <footer>
+          <span class="footer-brand"
+            >YodaX <span> / </span> A little foresight. A lot of evidence.</span
+          ><span>Estimates, not guarantees · Not investment advice</span>
+        </footer>
+      </main>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
