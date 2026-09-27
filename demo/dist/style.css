@@ -1064,3 +1064,16 @@ footer {
     display: none;
   }
 }
+
+.future-panel,.research-branch {background:var(--panel, #151a17);border:1px solid #30382f;border-radius:16px;padding:24px;margin-bottom:20px}
+.future-panel p,.future-note {color:#9ba69d;line-height:1.6}
+.future-panel form,#research-chat {display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+#future input {background:#101411;color:#edf4eb;border:1px solid #414c3e;border-radius:8px;padding:13px;min-width:180px;flex:1}
+#future button {background:#c8f675;color:#172013;border:0;border-radius:8px;padding:14px 20px;cursor:pointer;font-weight:600}
+#future button:disabled {opacity:.5;cursor:wait}
+.research-map>h3 {background:#c8f675;color:#172013;border-radius:30px;padding:16px 24px;display:table;margin:24px auto}
+.research-branches {border-left:2px solid #53673e;margin-left:20px;padding-left:24px}
+.research-branch summary {cursor:pointer;color:#c8f675;font-weight:600}
+.research-text {white-space:pre-wrap;line-height:1.8;margin-top:22px;overflow-wrap:anywhere}
+.research-branch a {color:#c8f675}.research-branch li {margin:10px 0}
+.search-suggestions {border:0;width:100%;height:180px;background:white;border-radius:8px;margin-top:16px}

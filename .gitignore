@@ -4,4 +4,6 @@ __pycache__/
 data/*
 !data/.gitkeep
 .env
+.env.*
+!.env.example
 .DS_Store

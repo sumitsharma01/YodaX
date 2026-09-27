@@ -36,12 +36,17 @@ To refresh only exchange rates:
 | `backend/learning.py` | Adaptive forecasts and settled-outcome updates |
 | `backend/app.py` | API and website server |
 | `backend/fx.py` | Exchange-rate cache and validation |
+| `backend/research.py` | Gemini requests, news feeds, research cache, and usage limits |
 | `demo/dist/` | Website source; directory retained from the first prototype |
 | `data/yodax.sqlite3` | Saved forecasts, outcomes, learning state, and dashboard |
 | `data/snapshots/` | Input CSVs identified by content hash |
 | `data/model/` | Downloaded model weights |
+| `data/research.sqlite3` | Commodity reports and daily Gemini request counts |
+| `.env` | Local Gemini credential; excluded from Git |
 
 `GET /api/health` checks the API; `GET /api/dashboard` returns saved results. API documentation is at `/docs`.
+
+Future Market uses `GET /api/research/status` and `POST /api/research`. Its local browser origin check expects port 5173. See [Future Market setup](future-market.md) before using another port. Daily stock jobs do not run commodity research.
 
 Back up the database and input snapshots. Weights can be downloaded again. Local data and the Python environment are ignored by Git. A process lock prevents simultaneous prediction jobs, and failed runs preserve the last completed dashboard.
 

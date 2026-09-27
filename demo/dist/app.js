@@ -106,8 +106,9 @@ function render() {
   chart();
 }
 function view(name) {
+  document.querySelector("#currency-note").hidden = name === "future";
   document.querySelector("#evaluation-control").hidden = name !== "performance";
-  ["overview", "tomorrow", "performance", "methodology"].forEach(
+  ["overview", "tomorrow", "performance", "methodology", "future"].forEach(
     (v) => (document.getElementById(v).hidden = v !== name),
   );
   document.querySelectorAll("[data-view]").forEach((b) => {
@@ -115,6 +116,7 @@ function view(name) {
     b.setAttribute("aria-current", b.dataset.view === name ? "page" : "false");
   });
   const titles = {
+    future: ["Future Market", "Understand what moves commodities.", "A weekly view of supply, demand and the world in between."],
     tomorrow: [
       "Tomorrow’s forecast",
       "Your next market outlook.",

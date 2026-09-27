@@ -4,6 +4,8 @@ YodaX forecasts the next trading day's closing price for six US stocks, then com
 
 It runs locally using Google's TimesFM 2.5 model. An experimental learning layer adjusts future estimates using completed predictions; it does not retrain TimesFM.
 
+Future Market adds an experimental commodity research assistant powered by Gemini. It analyses recent news headlines, follows an unresolved question, and presents sources in expandable branches. This research is separate from the stock forecasts.
+
 ## Run locally
 
 Tested on macOS with Apple Silicon and Python 3.13.
@@ -15,7 +17,7 @@ python3 -m venv .venv
 .venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 5173
 ```
 
-Open [localhost:5173](http://127.0.0.1:5173). The first run downloads about 882 MB of model weights. No API key is needed.
+Open [localhost:5173](http://127.0.0.1:5173). The first run downloads about 882 MB of model weights. No API key is needed for stock forecasts. The optional [Future Market research demo](docs/future-market.md) requires a Gemini key.
 
 ## What it does
 
@@ -24,6 +26,7 @@ Open [localhost:5173](http://127.0.0.1:5173). The first run downloads about 882 
 - Separates historical tests from predictions published in advance.
 - Displays prices in USD, INR, EUR, GBP, JPY, or CAD using dated exchange rates.
 - Keeps formulas and learning diagnostics in the optional Methodology view.
+- Investigates commodity headlines and qualitative scenarios, with source links and follow-up questions.
 
 To refresh data and forecasts, run `.venv/bin/python -m backend.run` again. The website reads saved results; clicking a company does not run the model.
 
@@ -31,22 +34,33 @@ To refresh data and forecasts, run `.venv/bin/python -m backend.run` again. The 
 
 ```text
 Stock prices → TimesFM + adaptive layer → SQLite → FastAPI → Dashboard
+News feeds → Gemini research + follow-up → SQLite → Future Market
 ```
 
 TimesFM uses the previous 256 closing prices. The adaptive layer blends its forecast with a no-change estimate and a bias-corrected forecast. After actual prices arrive, approaches with smaller errors gain relative weight. Original predictions are preserved so the comparison remains inspectable.
 
 This is a local research application. It has not established a trading advantage, and the learning loop does not guarantee improvement. Yahoo data is intended for personal use; a public deployment needs an appropriately licensed market-data source.
 
+## Optional Gemini setup
+
+Copy `.env.example` to `.env` if you do not already have one, then set `GEMINI_API_KEY` using a key from [Google AI Studio](https://aistudio.google.com/api-keys). Keep billing disabled in that Google project. Open **Future Market** in the website to start an investigation.
+
+The integration uses Gemini text generation and public news feeds, with no paid search-grounding tool or model fallback. It limits requests to 12 per UTC day and caches completed reports. Google may apply lower quotas or temporarily reject requests.
+
+The current demo reads headlines, not full articles, and does not produce validated commodity price targets or feed research into TimesFM. Basic Gemini generation was verified, but full research requests returned Google's temporary high-demand error during the latest check. End-to-end live research remains unverified.
+
 ## Documentation
 
 - [Model and learning loop](docs/model.md): model choice, evaluation, scoring, and references.
 - [Running YodaX](docs/running.md): daily runs, storage, currencies, and troubleshooting.
+- [Future Market](docs/future-market.md): Gemini setup, research flow, cost controls, and limitations.
 
 ## Checks
 
 ```sh
 .venv/bin/python -m unittest discover -s tests -v
 node --check demo/dist/app.js
+node --check demo/dist/future.js
 ```
 
 The repository contains source and documentation only. Model weights, market-data snapshots, local databases, and credentials are excluded.

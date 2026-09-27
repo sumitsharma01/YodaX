@@ -31,7 +31,7 @@
           ↗ <span>Tomorrow</span></button
         ><button class="nav" aria-label="Track record" data-view="performance">
           ▥ <span>Track record</span></button
-        ><button class="nav" aria-label="Methodology" data-view="methodology">
+        ><button class="nav" aria-label="Future Market" data-view="future">◎ <span>Future Market</span></button><button class="nav" aria-label="Methodology" data-view="methodology">
           ⌘ <span>Methodology</span>
         </button>
       </nav>
@@ -404,6 +404,26 @@
             </article>
           </div>
         </section>
+        <section id="future" hidden>
+          <div class="future-panel">
+            <h2>Follow the forces behind the market.</h2>
+            <p>Explore supply, trade and this week’s headlines with a sourced research assistant.</p>
+            <form id="research-form"><label for="commodity">Commodity</label>
+              <input id="commodity" list="commodities" value="Crude oil" maxlength="80" required minlength="2" />
+              <datalist id="commodities"><option>Crude oil</option><option>Gold</option><option>Copper</option><option>Iron ore</option><option>Natural gas</option><option>Silver</option></datalist>
+              <button type="submit">Investigate →</button>
+            </form>
+            <p id="research-status" role="status" aria-live="polite">Checking research availability…</p>
+          </div>
+          <div id="research-map" class="research-map"></div>
+          <div id="research-answer"></div>
+          <form id="research-chat" class="future-panel" hidden>
+            <label for="research-question">Ask a follow-up</label>
+            <input id="research-question" placeholder="What could change this outlook?" maxlength="600" required />
+            <button type="submit">Ask researcher →</button>
+          </form>
+          <p class="future-note">Experimental economic scenarios, not validated price forecasts. Research does not yet change the TimesFM stock model.</p>
+        </section>
         <footer>
           <span class="footer-brand"
             >YodaX <span> / </span> A little foresight. A lot of evidence.</span
@@ -411,6 +431,6 @@
         </footer>
       </main>
     </div>
-    <script src="app.js"></script>
+    <script src="app.js"></script><script src="future.js"></script>
   </body>
 </html>
