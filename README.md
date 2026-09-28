@@ -17,9 +17,11 @@ python3 -m venv .venv
 .venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 5173
 ```
 
-Open [localhost:5173](http://127.0.0.1:5173). The first run downloads about 882 MB of model weights. No API key is needed for stock forecasts. The optional [Future Market research demo](docs/future-market.md) requires a Gemini key.
+Open [localhost:5173](http://127.0.0.1:5173) for the landing page, then choose **Open workspace**. The dashboard is also available directly at [workspace.html](http://127.0.0.1:5173/workspace.html). The first run downloads about 882 MB of model weights. No API key is needed for stock forecasts. The optional [Future Market research demo](docs/future-market.md) requires a Gemini key.
 
 ## What it does
+
+- Introduces the product through a responsive landing page with an original animated signal graphic, feature overview and FAQs.
 
 - Forecasts AAPL, MSFT, GOOGL, TSLA, NVDA, and AMZN one trading session ahead.
 - Saves predictions before the target session opens and scores them on a later run.
@@ -65,6 +67,7 @@ The current demo reads headlines, not full articles, and does not produce valida
 .venv/bin/python -m unittest discover -s tests -v
 node --check demo/dist/app.js
 node --check demo/dist/future.js
+node --check demo/dist/landing.js
 ```
 
 The repository contains source and documentation only. Model weights, market-data snapshots, local databases, and credentials are excluded.

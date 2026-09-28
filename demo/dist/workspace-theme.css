@@ -1,0 +1,140 @@
+/* The same quiet, monochrome identity as the public landing page. */
+:root {
+  --bg: #10100e;
+  --panel: #161612;
+  --border: #30302a;
+  --text: #eeeae1;
+  --muted: #999b90;
+  --lime: #d9dfc5;
+  --red: #d9a79a;
+}
+body {
+  background: var(--bg);
+}
+aside {
+  background: #11110f;
+  border-color: #2a2a24;
+}
+.brand {
+  font-family: "DM Sans", sans-serif;
+  letter-spacing: -1.4px;
+  font-weight: 600;
+}
+.brand-icon {
+  background: transparent;
+  color: #eeeae1;
+  font-size: 36px;
+  width: 30px;
+}
+.lime {
+  color: #eeeae1;
+}
+.workspace {
+  color: #797d6e;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+}
+.nav.active {
+  background: #26281f;
+  color: #e0e5d1;
+}
+.nav:hover {
+  background: #20211b;
+}
+.profile > span {
+  background: #292c22;
+  color: #d9dfc5;
+}
+.model-icon {
+  color: #c6ccb4;
+}
+.panel {
+  background: linear-gradient(140deg, #191a15, #141510);
+  border-color: #31342a;
+}
+.page-heading h1 {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 450;
+  letter-spacing: -1.2px;
+}
+.eyebrow {
+  color: #9caa88;
+  font-size: 9px;
+}
+.fm-chat,
+.fm-evidence {
+  background: #14150f;
+  border-color: #303328;
+}
+.fm-toolbar {
+  margin-top: 28px;
+}
+.fm-chat-heading {
+  border-color: #2c3024;
+}
+.fm-chat-heading span:last-child {
+  color: #a6b391;
+}
+.fm-message.user .fm-message-body {
+  background: #262c1f;
+  border-color: #404936;
+}
+.fm-avatar {
+  background: #272e20;
+  color: #dce6c8;
+  border-color: #576448;
+}
+.fm-composer {
+  background: #1c2017;
+  border-color: #424a34;
+}
+.fm-message-body {
+  color: #d8dfca;
+}
+.fm-map-viewport {
+  background-color: #11150f;
+  background-image: radial-gradient(#333c2a 0.8px, transparent 0.8px);
+  border-color: #303727;
+}
+.fm-send-row button {
+  background: #e0e5d2 !important;
+  color: #20261a !important;
+}
+.fm-map-controls button,
+#future button {
+  background: #20251a;
+  border-color: #3b4430;
+}
+.fm-topic input {
+  color: #d7dec7;
+}
+.fm-prompts button {
+  color: #c4d0b5;
+}
+.fm-live-dot {
+  background: #d8e1c3;
+}
+.fm-welcome h2 {
+  font-weight: 450;
+}
+.fm-citation {
+  color: #d6e3bf;
+}
+.fm-message.selected-answer {
+  border-color: #a5b68e;
+}
+body[data-view="future"] .asof {
+  display: none;
+}
+body[data-view="future"] .header-tools {
+  visibility: hidden;
+}
+.pill {
+  border-color: #404733;
+  color: #bdcba7;
+}
+@media (min-width: 1101px) {
+  .fm-workspace {
+    grid-template-columns: minmax(320px, 0.95fr) minmax(400px, 1.15fr);
+  }
+}

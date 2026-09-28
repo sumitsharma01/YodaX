@@ -4,6 +4,8 @@ YodaX has two independent workflows: daily stock forecasting and on-demand commo
 
 ## Using the website
 
+The homepage introduces YodaX with an animated signal graphic, feature overview and FAQs. Choose **Explore forecasts** for the dashboard or **Ask YodaX** to open Future Market directly. Both use the same local application; saved conversations remain available.
+
 | Section | What you can do |
 | --- | --- |
 | Overview | Select a company, explore price history, and see the next-session forecast and estimated range. |

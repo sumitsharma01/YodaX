@@ -106,17 +106,22 @@ function render() {
   chart();
 }
 function view(name) {
+  document.body.dataset.view = name;
   document.querySelector("#currency-note").hidden = name === "future";
   document.querySelector("#evaluation-control").hidden = name !== "performance";
   ["overview", "tomorrow", "performance", "methodology", "future"].forEach(
     (v) => (document.getElementById(v).hidden = v !== name),
   );
-  document.querySelectorAll("[data-view]").forEach((b) => {
+  document.querySelectorAll(".nav[data-view]").forEach((b) => {
     b.classList.toggle("active", b.dataset.view === name);
     b.setAttribute("aria-current", b.dataset.view === name ? "page" : "false");
   });
   const titles = {
-    future: ["Future Market", "Understand what moves commodities.", "A weekly view of supply, demand and the world in between."],
+    future: [
+      "Future Market",
+      "Understand what moves commodities.",
+      "A weekly view of supply, demand and the world in between.",
+    ],
     tomorrow: [
       "Tomorrow’s forecast",
       "Your next market outlook.",
@@ -211,7 +216,7 @@ function renderMetrics() {
       : "Predictions saved before trading, compared with the actual close.";
 }
 document
-  .querySelectorAll("[data-view]")
+  .querySelectorAll(".nav[data-view]")
   .forEach((b) => (b.onclick = () => view(b.dataset.view)));
 document.querySelector("#view-record").onclick = () => {
   view("performance");
@@ -245,8 +250,7 @@ async function boot() {
     stocks = payload.stocks;
     selected = stocks[0];
     configureCurrency();
-    document.querySelector("#overview").hidden = false;
-    document.querySelector("#evaluation-control").hidden = true;
+
     document.querySelector(".demo-badge").textContent =
       `Updated ${shortDate(payload.cutoff)}`;
 
@@ -262,6 +266,7 @@ async function boot() {
     renderMetrics();
     render();
     renderLearning();
+    view(document.body.dataset.view || "overview");
   } catch (error) {
     document.querySelector(".notice").hidden = false;
     document.querySelector(".notice").textContent =
@@ -343,3 +348,12 @@ document.querySelector("#currency").onchange = (e) => {
   render();
   renderLearning();
 };
+
+const requestedView = new URLSearchParams(location.search).get("view");
+if (
+  ["overview", "tomorrow", "performance", "methodology", "future"].includes(
+    requestedView,
+  )
+) {
+  view(requestedView);
+}

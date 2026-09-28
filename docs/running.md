@@ -37,7 +37,9 @@ To refresh only exchange rates:
 | `backend/app.py` | API and website server |
 | `backend/fx.py` | Exchange-rate cache and validation |
 | `backend/research.py` | Gemini chat, news feeds, evidence graphs, and usage limits |
-| `demo/dist/` | Website source; directory retained from the first prototype |
+| `demo/dist/index.html` | Public landing page, with `landing.css` and `landing.js` |
+| `demo/dist/workspace.html` | Forecast and research workspace; supports `?view=future` and other section names |
+| `demo/dist/workspace-theme.css` | Shared visual identity applied to the workspace |
 | `data/yodax.sqlite3` | Saved forecasts, outcomes, learning state, and dashboard |
 | `data/snapshots/` | Input CSVs identified by content hash |
 | `data/model/` | Downloaded model weights |

@@ -497,8 +497,12 @@
       setBusy(false);
     }
   }
-  document.querySelector('[data-view="future"]').addEventListener('click', () => {
-    requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; });
-  });
+  document
+    .querySelector('.nav[data-view="future"]')
+    .addEventListener("click", () => {
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+      });
+    });
   restore();
 })();
