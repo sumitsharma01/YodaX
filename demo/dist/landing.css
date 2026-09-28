@@ -862,10 +862,13 @@ footer small {
 .world-stage[data-step="2"] .signal-caption{opacity:.45}
 @media(max-width:560px){#world-map{width:100%;left:0;height:auto;top:15px}.country-point text{font-size:10px;letter-spacing:0}.country-point .signal-caption{display:none}.world-map-wrap{min-height:360px}}
 
-/* Keep every connection visible; the connect chapter intensifies the flow. */
-.world-stage .signal-routes path{opacity:.42;stroke-width:1.5;stroke-dasharray:4 6;vector-effect:non-scaling-stroke}
-.world-stage[data-step="1"] .signal-routes path{opacity:.65}
-.world-stage[data-step="2"] .signal-routes path{opacity:.95;stroke:#e2e1d6}
-.world-stage .flow-particles circle{opacity:.8}
-.world-stage[data-step="3"] .signal-routes path{opacity:.18}
-.world-stage[data-step="3"] .flow-particles circle{opacity:0}
+/* Signals glow locally; connections activate only when the agent arrives. */
+.world-stage .signal-routes path{opacity:0;stroke-width:1.5;stroke-dasharray:4 6;vector-effect:non-scaling-stroke;transition:opacity .5s}
+.world-stage .flow-particles circle{opacity:0;transition:none}
+.world-stage[data-step="2"] .signal-routes path{opacity:.95;stroke:#e2e1d6;transition-delay:.65s}
+.world-stage[data-step="2"] .flow-particles circle{opacity:1;transition:opacity .2s .8s}
+.world-stage[data-step="0"] .point-core,.world-stage[data-step="1"] .point-core{animation:live-signal-glow 2.4s ease-in-out infinite}
+.country-point:nth-of-type(2n) .point-core{animation-delay:-.8s}
+.country-point:nth-of-type(3n) .point-core{animation-delay:-1.6s}
+@keyframes live-signal-glow{0%,100%{opacity:.6;filter:drop-shadow(0 0 2px #eeeada)}50%{opacity:1;filter:drop-shadow(0 0 8px #eeeada)}}
+@media(prefers-reduced-motion:reduce){.world-stage .point-core{animation:none!important}}

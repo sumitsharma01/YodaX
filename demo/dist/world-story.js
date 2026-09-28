@@ -22,7 +22,7 @@
   function controls(){stage.classList.toggle('is-paused',paused);stage.classList.toggle('is-reduced',reduced.matches);play.disabled=reduced.matches;play.textContent=reduced.matches?'—':paused?'▷':'Ⅱ';play.setAttribute('aria-pressed',String(paused));play.setAttribute('aria-label',reduced.matches?'Reduced motion enabled; use chapter buttons':paused?'Play product animation':'Pause product animation');}
   function chapter(index,reset=true){step=index;stage.dataset.step=String(index);if(reset)elapsed=index*duration;chapters.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));label.textContent=captions[index][0];copy.textContent=captions[index][1];
     for(const [selector,shown] of [['.history-book',index===1||index===2],['.world-news',index<3],['.world-agent',index===2],['.world-result',index===3]]){stage.querySelectorAll(selector).forEach(element=>{element.inert=!shown;element.setAttribute('aria-hidden',String(!shown));});}
-    routes.forEach(({path,dot},i)=>{const point=path.getPointAtLength(path.getTotalLength()*((.35+i*.15)%1));dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);});
+    routes.forEach(({path,dot},i)=>{const point=path.getPointAtLength(0);dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);});
   }
   function inspect(region){paused=true;const index=region==='history'?2:1;chapter(index);label.textContent=details[region][0];copy.textContent=details[region][1];controls();document.querySelectorAll('.map-country.featured').forEach(p=>p.classList.toggle('selected',p.dataset.region===region));}
   document.querySelectorAll('[data-region]').forEach(button=>{button.addEventListener('click',()=>inspect(button.dataset.region));button.addEventListener('keydown',event=>{if(button.tagName.toLowerCase()==='g'&&['Enter',' '].includes(event.key)){event.preventDefault();inspect(button.dataset.region);}});});
@@ -32,7 +32,7 @@
   const routes=['usa','china','germany','japan','uk','india','history'].map(name=>({path:document.getElementById('route-'+name),dot:document.getElementById('dot-'+name)}));
   let animationFrame=0;
   function tick(now){const delta=last?Math.min(now-last,100):0;last=now;if(visible&&!document.hidden&&!paused&&!reduced.matches){elapsed=(elapsed+delta)%(duration*4);const next=Math.floor(elapsed/duration);if(next!==step)chapter(next,false);}
-    if(visible&&step!==3&&!paused&&!reduced.matches){routes.forEach(({path,dot},i)=>{const phase=(elapsed/3000+i*.23)%1;const point=path.getPointAtLength(path.getTotalLength()*phase);dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);});}
+    if(visible&&!document.hidden&&step===2&&!paused&&!reduced.matches){routes.forEach(({path,dot},i)=>{const travel=elapsed-duration*2-800-i*90;const phase=travel<=0?0:(travel%2800)/2800;const point=path.getPointAtLength(path.getTotalLength()*phase);dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);});}
     animationFrame=requestAnimationFrame(tick);
   }
   new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;},{threshold:.15}).observe(stage);
