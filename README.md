@@ -26,7 +26,9 @@ Open [localhost:5173](http://127.0.0.1:5173). The first run downloads about 882 
 - Separates historical tests from predictions published in advance.
 - Displays prices in USD, INR, EUR, GBP, JPY, or CAD using dated exchange rates.
 - Keeps formulas and learning diagnostics in the optional Methodology view.
-- Investigates commodity headlines and qualitative scenarios, with source links and follow-up questions.
+- Chats about commodity headlines and qualitative scenarios, with contextual follow-ups and saved conversations.
+- Shows a clickable evidence map for each answer, linking sources, proposed mechanisms, risks and the outlook.
+- Preserves completed research through reloads and handles temporary Gemini failures with a bounded retry.
 
 To refresh data and forecasts, run `.venv/bin/python -m backend.run` again. The website reads saved results; clicking a company does not run the model.
 
@@ -50,6 +52,8 @@ The integration uses Gemini text generation and public news feeds, with no paid 
 The current demo reads headlines, not full articles, and does not produce validated commodity price targets or feed research into TimesFM. Live commodity chat, contextual follow-ups and linked evidence graphs have been verified with Gemini 3.1 Flash-Lite. Provider availability and free-tier quotas still apply.
 
 ## Documentation
+
+- [Features and workflows](docs/workflows.md): how to use each section, end-to-end diagrams, component responsibilities, and current boundaries.
 
 - [Model and learning loop](docs/model.md): model choice, evaluation, scoring, and references.
 - [Running YodaX](docs/running.md): daily runs, storage, currencies, and troubleshooting.
