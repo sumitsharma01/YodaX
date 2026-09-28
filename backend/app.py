@@ -5,10 +5,14 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from .core import ROOT, connect
 from .fx import cached
-from .research import router as research_router
+from .research import router as research_router, recover_interrupted
 
 app = FastAPI(title='YodaX', version='0.2.0')
 app.include_router(research_router)
+
+@app.on_event('startup')
+def recover_research():
+    recover_interrupted()
 
 @app.get('/api/health')
 def health():

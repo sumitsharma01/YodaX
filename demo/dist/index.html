@@ -31,7 +31,9 @@
           ↗ <span>Tomorrow</span></button
         ><button class="nav" aria-label="Track record" data-view="performance">
           ▥ <span>Track record</span></button
-        ><button class="nav" aria-label="Future Market" data-view="future">◎ <span>Future Market</span></button><button class="nav" aria-label="Methodology" data-view="methodology">
+        ><button class="nav" aria-label="Future Market" data-view="future">
+          ◎ <span>Future Market</span></button
+        ><button class="nav" aria-label="Methodology" data-view="methodology">
           ⌘ <span>Methodology</span>
         </button>
       </nav>
@@ -405,24 +407,148 @@
           </div>
         </section>
         <section id="future" hidden>
-          <div class="future-panel">
-            <h2>Follow the forces behind the market.</h2>
-            <p>Explore supply, trade and this week’s headlines with a sourced research assistant.</p>
-            <form id="research-form"><label for="commodity">Commodity</label>
-              <input id="commodity" list="commodities" value="Crude oil" maxlength="80" required minlength="2" />
-              <datalist id="commodities"><option>Crude oil</option><option>Gold</option><option>Copper</option><option>Iron ore</option><option>Natural gas</option><option>Silver</option></datalist>
-              <button type="submit">Investigate →</button>
-            </form>
-            <p id="research-status" role="status" aria-live="polite">Checking research availability…</p>
+          <div class="fm-toolbar">
+            <div>
+              <span class="fm-live-dot"></span><strong>YodaX Research</strong
+              ><span class="fm-subtle">Commodity intelligence</span>
+            </div>
+            <button id="new-research" type="button">＋ New conversation</button>
           </div>
-          <div id="research-map" class="research-map"></div>
-          <div id="research-answer"></div>
-          <form id="research-chat" class="future-panel" hidden>
-            <label for="research-question">Ask a follow-up</label>
-            <input id="research-question" placeholder="What could change this outlook?" maxlength="600" required />
-            <button type="submit">Ask researcher →</button>
-          </form>
-          <p class="future-note">Experimental economic scenarios, not validated price forecasts. Research does not yet change the TimesFM stock model.</p>
+          <div class="fm-workspace">
+            <section class="fm-chat" aria-label="Commodity research chat">
+              <div class="fm-chat-heading">
+                <span>CONVERSATION</span
+                ><span id="research-connection">Connecting…</span>
+              </div>
+              <div
+                id="research-messages"
+                class="fm-messages"
+                role="log"
+                aria-label="Conversation messages"
+                aria-live="polite"
+              >
+                <div id="research-welcome" class="fm-welcome">
+                  <div class="fm-avatar">✳</div>
+                  <h2>What’s moving your market?</h2>
+                  <p>
+                    Ask about a commodity. We’ll connect this week’s headlines,
+                    explore the implications, and show the evidence behind the
+                    outlook.
+                  </p>
+                  <div class="fm-prompts">
+                    <button
+                      type="button"
+                      data-topic="Crude oil"
+                      data-prompt="What is driving crude oil this week, and what could change the outlook?"
+                    >
+                      Oil · What could move prices? ↗
+                    </button>
+                    <button
+                      type="button"
+                      data-topic="Copper"
+                      data-prompt="How could Chinese demand affect copper this week?"
+                    >
+                      Copper · Follow the demand ↗
+                    </button>
+                    <button
+                      type="button"
+                      data-topic="Iron ore"
+                      data-prompt="What do recent iron ore headlines tell us about supply, trade and risks?"
+                    >
+                      Iron ore · Connect supply and trade ↗
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div
+                id="research-status"
+                class="fm-status"
+                role="status"
+                aria-live="polite"
+              ></div>
+              <form id="research-chat" class="fm-composer">
+                <div class="fm-topic">
+                  <label for="commodity">Focus</label
+                  ><input
+                    id="commodity"
+                    value="Crude oil"
+                    maxlength="80"
+                    required
+                    minlength="2"
+                    aria-label="Commodity focus"
+                  />
+                </div>
+                <label class="sr-only" for="research-question"
+                  >Message the research agent</label
+                >
+                <textarea
+                  id="research-question"
+                  placeholder="Ask about supply, trade, demand or a possible scenario…"
+                  maxlength="2000"
+                  required
+                  rows="3"
+                ></textarea>
+                <div class="fm-send-row">
+                  <small>Public headlines · Gemini · No trading advice</small
+                  ><button
+                    id="research-send"
+                    type="submit"
+                    aria-label="Send message"
+                  >
+                    Send ↑
+                  </button>
+                </div>
+              </form>
+            </section>
+            <section class="fm-evidence" aria-label="Evidence mind map">
+              <div class="fm-map-heading">
+                <div>
+                  <span class="fm-kicker">CONNECTED CONTEXT</span>
+                  <h2>Why this outlook?</h2>
+                </div>
+                <div class="fm-map-controls">
+                  <button id="map-minus" type="button" aria-label="Zoom out">
+                    −</button
+                  ><button id="map-reset" type="button">Fit</button
+                  ><button id="map-plus" type="button" aria-label="Zoom in">
+                    ＋
+                  </button>
+                </div>
+              </div>
+              <div class="fm-legend">
+                <span class="evidence">● Evidence</span
+                ><span class="mechanism">● Hypothesis</span
+                ><span class="risk">● Risk</span
+                ><span class="outlook">● Outlook</span>
+              </div>
+              <p id="map-caption" class="fm-map-caption">
+                Your evidence map will appear here as the conversation develops.
+              </p>
+              <div id="research-map" class="fm-map-viewport">
+                <div class="fm-map-placeholder">
+                  <span>◎</span>
+                  <p>Start with a question.<br />Explore the connections.</p>
+                </div>
+              </div>
+              <div id="map-detail" class="fm-map-detail">
+                <p>
+                  Select a node to see its context, supporting sources and
+                  connections.
+                </p>
+              </div>
+              <details class="fm-source-drawer">
+                <summary>Sources & research activity</summary>
+                <div id="research-sources">
+                  <p>Sources appear after your first answer.</p>
+                </div>
+              </details>
+              <p class="fm-footnote">
+                Links describe evidence and proposed mechanisms, not proven
+                causation. Headlines are not full-article verification. This
+                research does not change TimesFM price forecasts.
+              </p>
+            </section>
+          </div>
         </section>
         <footer>
           <span class="footer-brand"
@@ -431,6 +557,7 @@
         </footer>
       </main>
     </div>
-    <script src="app.js"></script><script src="future.js"></script>
+    <script src="app.js"></script>
+    <script src="future.js"></script>
   </body>
 </html>

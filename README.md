@@ -4,7 +4,7 @@ YodaX forecasts the next trading day's closing price for six US stocks, then com
 
 It runs locally using Google's TimesFM 2.5 model. An experimental learning layer adjusts future estimates using completed predictions; it does not retrain TimesFM.
 
-Future Market adds an experimental commodity research assistant powered by Gemini. It analyses recent news headlines, follows an unresolved question, and presents sources in expandable branches. This research is separate from the stock forecasts.
+Future Market adds an experimental commodity research assistant powered by Gemini. It analyses recent news headlines, follows an unresolved question, and presents a linked evidence map alongside the conversation. This research is separate from the stock forecasts.
 
 ## Run locally
 
@@ -45,9 +45,9 @@ This is a local research application. It has not established a trading advantage
 
 Copy `.env.example` to `.env` if you do not already have one, then set `GEMINI_API_KEY` using a key from [Google AI Studio](https://aistudio.google.com/api-keys). Keep billing disabled in that Google project. Open **Future Market** in the website to start an investigation.
 
-The integration uses Gemini text generation and public news feeds, with no paid search-grounding tool or model fallback. It limits requests to 12 per UTC day and caches completed reports. Google may apply lower quotas or temporarily reject requests.
+The integration uses Gemini text generation and public news feeds, with no paid search-grounding tool or model fallback. It limits generation attempts to 40 per UTC day and saves conversations locally. Temporary server errors receive one bounded retry. Google may apply lower quotas or temporarily reject requests.
 
-The current demo reads headlines, not full articles, and does not produce validated commodity price targets or feed research into TimesFM. Basic Gemini generation was verified, but full research requests returned Google's temporary high-demand error during the latest check. End-to-end live research remains unverified.
+The current demo reads headlines, not full articles, and does not produce validated commodity price targets or feed research into TimesFM. Live commodity chat, contextual follow-ups and linked evidence graphs have been verified with Gemini 3.1 Flash-Lite. Provider availability and free-tier quotas still apply.
 
 ## Documentation
 
