@@ -119,10 +119,10 @@ Connecting research to TimesFM is future work. That requires numerical features 
 
 ## Homepage product story
 
-The homepage has a looping company strip and an interactive, four-chapter world map: news signals, growing demand, historical context and an illustrative outlook. Select any of the five country signals or the historical-data book to inspect the input, or use the chapter buttons and pause control. Reduced-motion preferences disable automatic playback.
+The homepage has a looping company strip and an interactive, four-chapter world map: news signals, growing demand, historical context and an illustrative outlook. Select any of the six country signals or the historical-data book to inspect the input, or use the chapter buttons and pause control. Reduced-motion preferences disable automatic playback.
 
 This animation is a product concept. Its headlines and outlook are illustrative, and it makes no AI requests. Commodity research and TimesFM price forecasting still run separately.
 
 Country outlines are bundled locally in `demo/dist/world-map.json`, simplified from the public-domain [Natural Earth 1:110m countries dataset](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/). Animation behavior lives in `world-story.js`.
 
-The map uses the United States, China, Germany, Japan and United Kingdom: the top five in the [2026 nominal GDP ranking](https://statisticsoftheworld.com/gdp-by-country), based on IMF WEO estimates. This is a fixed illustrative selection, not a live ranking. All signals are hypothetical.
+The map uses the United States, China, Germany, Japan and United Kingdom: the top five in the [2026 nominal GDP ranking](https://statisticsoftheworld.com/gdp-by-country), based on IMF WEO estimates. India is included as a sixth signal. This is a fixed illustrative selection, not a live ranking. All signals are hypothetical.

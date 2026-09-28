@@ -15,8 +15,9 @@
   const chapters=[...document.querySelectorAll('[data-chapter]')];
   const duration=5000;
   let elapsed=0, step=0, paused=reduced.matches, visible=false, last=0;
-  const captions=[['01 / SIGNALS EMERGE','Illustrative signals emerge from five major economies. Select a region to explore its context.'],['02 / DEMAND BUILDS','The signals strengthen. Historical data adds a longer view beyond today’s headlines.'],['03 / CONTEXT CONNECTS','The agent brings demand and supply signals together with historical context. Select the book to inspect its role.'],['04 / A POSSIBLE OUTLOOK','An illustrative forecast brings the context into focus. This is a product vision, not a live model output.']];
+  const captions=[['01 / SIGNALS EMERGE','Illustrative signals emerge from six major economies. Select a region to explore its context.'],['02 / DEMAND BUILDS','The signals strengthen. Historical data adds a longer view beyond today’s headlines.'],['03 / CONTEXT CONNECTS','The agent brings demand and supply signals together with historical context. Select the book to inspect its role.'],['04 / A POSSIBLE OUTLOOK','An illustrative forecast brings the context into focus. This is a product vision, not a live model output.']];
   const details={"usa": ["UNITED STATES / ILLUSTRATIVE SIGNAL", "Suppose US manufacturing demand rises. Investigate commodity use, reporting dates and contradictory evidence."], "china": ["CHINA / ILLUSTRATIVE SIGNAL", "Suppose Chinese infrastructure spending strengthens. Compare steel demand, trade flows and whether prices already reflect it."], "history": ["HISTORICAL DATA / CONTEXT", "Past prices and supply\u2013demand cycles provide a baseline. TimesFM currently uses price history separately; feeding researched news into that forecast is future work."], "germany": ["GERMANY / ILLUSTRATIVE SIGNAL", "Suppose German industrial energy demand increases. Compare manufacturing activity, storage levels and imports before inferring a price effect."], "uk": ["UNITED KINGDOM / ILLUSTRATIVE SIGNAL", "Suppose UK energy imports shift. Compare domestic supply, storage, weather and shipping costs against historical patterns."]};
+  details.india=['INDIA / ILLUSTRATIVE SIGNAL','Suppose Indian energy imports rise. Compare refinery demand, inventories, industrial activity and shipping costs before inferring a price effect.'];
   details.japan=['JAPAN / ILLUSTRATIVE SIGNAL','Suppose Japanese industrial demand changes. Compare manufacturing orders, metal imports and energy use, including evidence that challenges the signal.'];
   function controls(){stage.classList.toggle('is-paused',paused);stage.classList.toggle('is-reduced',reduced.matches);play.disabled=reduced.matches;play.textContent=reduced.matches?'—':paused?'▷':'Ⅱ';play.setAttribute('aria-pressed',String(paused));play.setAttribute('aria-label',reduced.matches?'Reduced motion enabled; use chapter buttons':paused?'Play product animation':'Pause product animation');}
   function chapter(index,reset=true){step=index;stage.dataset.step=String(index);if(reset)elapsed=index*duration;chapters.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));label.textContent=captions[index][0];copy.textContent=captions[index][1];
@@ -28,7 +29,7 @@
   document.getElementById('history-book').onclick=()=>inspect('history');
   chapters.forEach((button,i)=>button.onclick=()=>{paused=true;chapter(i);controls();});
   play.onclick=()=>{paused=!paused;controls();};
-  const routes=['usa','china','germany','japan','uk','history'].map(name=>({path:document.getElementById('route-'+name),dot:document.getElementById('dot-'+name)}));
+  const routes=['usa','china','germany','japan','uk','india','history'].map(name=>({path:document.getElementById('route-'+name),dot:document.getElementById('dot-'+name)}));
   let animationFrame=0;
   function tick(now){const delta=last?Math.min(now-last,100):0;last=now;if(visible&&!document.hidden&&!paused&&!reduced.matches){elapsed=(elapsed+delta)%(duration*4);const next=Math.floor(elapsed/duration);if(next!==step)chapter(next,false);}
     if(visible&&step!==3&&!paused&&!reduced.matches){routes.forEach(({path,dot},i)=>{const phase=(elapsed/3000+i*.23)%1;const point=path.getPointAtLength(path.getTotalLength()*phase);dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);});}
@@ -39,7 +40,7 @@
   fetch('world-map.json').then(response=>{if(!response.ok)throw new Error('Map unavailable');return response.json();}).then(features=>{
     const fragment=document.createDocumentFragment();
     for(const feature of features){const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',feature.path);path.setAttribute('class','map-country');
-      const region=({'United States of America':'usa','China':'china','Germany':'germany','Japan':'japan','United Kingdom':'uk'})[feature.name]||null;
+      const region=({'United States of America':'usa','China':'china','India':'india','Germany':'germany','Japan':'japan','United Kingdom':'uk'})[feature.name]||null;
       if(region){path.classList.add('featured');path.dataset.region=region;path.setAttribute('role','button');path.setAttribute('tabindex','0');path.setAttribute('aria-label','Explore '+feature.name+' market signal');path.addEventListener('click',()=>inspect(region));path.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();inspect(region);}});}
       else path.setAttribute('aria-hidden','true');fragment.append(path);
     }countries.append(fragment);
