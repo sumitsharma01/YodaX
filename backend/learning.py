@@ -72,7 +72,9 @@ def advance(db, snapshot, revision, now):
         prediction=json.loads(row['payload'])
         result=score(row['previous'],prediction['predicted'],row['outcome'],prediction['scale'])
         result['raw']=score(row['previous'],prediction['experts'][0],row['outcome'],prediction['scale'])
+        result['state_before']=json.loads(json.dumps(state))
         state=update(state,prediction,row['outcome'],row['previous'])
+        result['state_after']=json.loads(json.dumps(state))
         db.execute('UPDATE adaptive_forecasts SET evaluated_at=?,actual=?,result=? WHERE symbol=? AND target=? AND revision=? AND version=?',
                    (now,row['outcome'],json.dumps(result),symbol,row['target'],revision,VERSION))
     db.execute('INSERT OR REPLACE INTO learning_state VALUES (?,?,?,?)',(symbol,revision,VERSION,json.dumps(state)))

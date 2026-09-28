@@ -50,6 +50,10 @@ class LearningTests(unittest.TestCase):
         advance(db,snapshot,'r','2026-09-28T22:00:00+00:00')
         self.assertEqual(snapshot['adaptive']['state']['count'],1)
         self.assertEqual(len(snapshot['learning_results']),1)
+        audit=snapshot['learning_results'][0]
+        self.assertEqual(audit['state_before']['count'],0)
+        self.assertEqual(audit['state_after']['count'],1)
+        self.assertNotEqual(audit['state_before']['weights'],audit['state_after']['weights'])
         weights=copy.deepcopy(snapshot['adaptive']['weights'])
         advance(db,snapshot,'r','2026-09-28T23:00:00+00:00')
         self.assertEqual(snapshot['adaptive']['state']['count'],1)

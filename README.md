@@ -27,7 +27,7 @@ Open [localhost:5173](http://127.0.0.1:5173) for the landing page, then choose *
 - Saves predictions before the target session opens and scores them on a later run.
 - Separates historical tests from predictions published in advance.
 - Displays prices in USD, INR, EUR, GBP, JPY, or CAD using dated exchange rates.
-- Keeps formulas and learning diagnostics in the optional Methodology view.
+- Makes adaptation inspectable: Methodology separates saved live predictions from a read-only historical replay, with error comparisons, weight changes and an evidence download.
 - Chats about commodity headlines and qualitative scenarios, with contextual follow-ups and saved conversations.
 - Shows a clickable evidence map for each answer, linking sources, proposed mechanisms, risks and the outlook.
 - Preserves completed research through reloads and handles temporary Gemini failures with a bounded retry.
@@ -68,6 +68,7 @@ The current demo reads headlines, not full articles, and does not produce valida
 node --check demo/dist/app.js
 node --check demo/dist/future.js
 node --check demo/dist/landing.js
+node --check demo/dist/methodology.js
 ```
 
 The repository contains source and documentation only. Model weights, market-data snapshots, local databases, and credentials are excluded.

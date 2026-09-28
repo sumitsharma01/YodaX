@@ -30,4 +30,20 @@ def dashboard():
     payload['fx'] = cached()
     return JSONResponse(payload, headers={'Cache-Control': 'no-store'})
 
+@app.get('/api/evidence')
+def evidence():
+    from .evidence import build
+    with connect() as db:
+        row = db.execute('SELECT payload FROM dashboard WHERE id=1').fetchone()
+        if not row:
+            raise HTTPException(503, 'No saved forecasts available.')
+        result = build(db, json.loads(row['payload']))
+    return JSONResponse(result, headers={'Cache-Control': 'no-store'})
+
+@app.get('/api/evidence/export')
+def export_evidence():
+    response = evidence()
+    response.headers['Content-Disposition'] = 'attachment; filename="yodax-evidence.json"'
+    return response
+
 app.mount('/', StaticFiles(directory=ROOT / 'demo' / 'dist', html=True), name='website')

@@ -62,10 +62,10 @@ function chart() {
     .join(" ");
   const ticks = Array.from({ length: 5 }, (_, i) => {
     const v = min + ((max - min) * i) / 4;
-    return `<line x1="14" x2="742" y1="${y(v)}" y2="${y(v)}" stroke="#2a332c" stroke-dasharray="3 5"/><text x="751" y="${y(v) + 4}" fill="#929f94" font-size="11">${(v * fxRate()).toLocaleString("en-US", { maximumFractionDigits: 0 })}</text>`;
+    return `<line x1="14" x2="742" y1="${y(v)}" y2="${y(v)}" stroke="#303029" stroke-dasharray="3 5"/><text x="751" y="${y(v) + 4}" fill="#92968a" font-size="11">${(v * fxRate()).toLocaleString("en-US", { maximumFractionDigits: 0 })}</text>`;
   }).join("");
   document.querySelector("#price-chart").innerHTML =
-    `<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8f675" stop-opacity=".16"/><stop offset="1" stop-color="#c8f675" stop-opacity="0"/></linearGradient></defs>${ticks}<rect x="642" y="12" width="99" height="201" fill="#c8f675" opacity=".025"/><path d="${path} L641,214 L14,214 Z" fill="url(#fill)"/><path d="${path}" fill="none" stroke="#bfcdbb" stroke-width="2.5" stroke-linejoin="round"/><path d="M641,${y(selected.price)} L719,${y(hi)} L719,${y(lo)} Z" fill="#c8f675" opacity=".13"/><line x1="641" x2="641" y1="12" y2="215" stroke="#778570" stroke-dasharray="4 5"/><path d="M641,${y(selected.price)} L719,${y(forecast)}" fill="none" stroke="#c8f675" stroke-width="2.5" stroke-dasharray="5 4"/><circle cx="719" cy="${y(forecast)}" r="5" fill="#c8f675"/><text x="660" y="${Math.max(12, y(hi) - 9)}" fill="#c8f675" font-size="11">FORECAST</text><text x="14" y="243" fill="#929f94" font-size="11">${shortDate(selected.dates.slice(-range)[0])}</text><text x="310" y="243" fill="#929f94" font-size="11">${shortDate(selected.dates.slice(-range)[Math.floor(values.length / 2)])}</text><text x="611" y="243" fill="#929f94" font-size="11">${shortDate(selected.forecast.cutoff)}</text><text x="698" y="243" fill="#c8f675" font-size="11">${shortDate(selected.forecast.target)}</text>`;
+    `<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0dfd6" stop-opacity=".16"/><stop offset="1" stop-color="#e0dfd6" stop-opacity="0"/></linearGradient></defs>${ticks}<rect x="642" y="12" width="99" height="201" fill="#e0dfd6" opacity=".025"/><path d="${path} L641,214 L14,214 Z" fill="url(#fill)"/><path d="${path}" fill="none" stroke="#bdbeb2" stroke-width="2.5" stroke-linejoin="round"/><path d="M641,${y(selected.price)} L719,${y(hi)} L719,${y(lo)} Z" fill="#e0dfd6" opacity=".13"/><line x1="641" x2="641" y1="12" y2="215" stroke="#787d6d" stroke-dasharray="4 5"/><path d="M641,${y(selected.price)} L719,${y(forecast)}" fill="none" stroke="#e0dfd6" stroke-width="2.5" stroke-dasharray="5 4"/><circle cx="719" cy="${y(forecast)}" r="5" fill="#e0dfd6"/><text x="660" y="${Math.max(12, y(hi) - 9)}" fill="#e0dfd6" font-size="11">FORECAST</text><text x="14" y="243" fill="#92968a" font-size="11">${shortDate(selected.dates.slice(-range)[0])}</text><text x="310" y="243" fill="#92968a" font-size="11">${shortDate(selected.dates.slice(-range)[Math.floor(values.length / 2)])}</text><text x="611" y="243" fill="#92968a" font-size="11">${shortDate(selected.forecast.cutoff)}</text><text x="698" y="243" fill="#e0dfd6" font-size="11">${shortDate(selected.forecast.target)}</text>`;
   document
     .querySelector("#price-chart")
     .setAttribute(
@@ -107,7 +107,10 @@ function render() {
 }
 function view(name) {
   document.body.dataset.view = name;
-  document.querySelector("#currency-note").hidden = name === "future";
+  document.querySelector("#currency-note").hidden = [
+    "future",
+    "methodology",
+  ].includes(name);
   document.querySelector("#evaluation-control").hidden = name !== "performance";
   ["overview", "tomorrow", "performance", "methodology", "future"].forEach(
     (v) => (document.getElementById(v).hidden = v !== name),
@@ -139,8 +142,8 @@ function view(name) {
     ],
     methodology: [
       "Methodology",
-      "Know what’s behind the number.",
-      "A transparent approach to forecasting and evaluation.",
+      "Evidence, before claims.",
+      "See what was saved, what changed, and what the results support.",
     ],
   };
   const t = titles[name];
@@ -153,30 +156,10 @@ function renderMetrics() {
   const records = stocks.flatMap(recordsFor),
     count = records.length;
   document.querySelector("#all-rows").closest("table").tHead.hidden = !count;
-  document.querySelector(".metrics").hidden = !count;
   const scores = records.filter((r) => r.scoring);
   document.querySelector("#results-summary").textContent = count
     ? `${scope === "historical" ? "Historical tests — generated after the fact." : "Published before the trading session."} ${count} results${scores.length ? ` · Average score ${mean(scores.map((r) => r.scoring.score)).toFixed(0)}/100` : ""}. Scores measure closeness, not the probability of being correct.`
     : "Results available after market close. Your first predictions are saved and waiting for actual closing prices.";
-  document.querySelector("#mae").innerHTML = count
-    ? `${mean(records.map((r) => r.error)).toFixed(2)}<small>pp</small>`
-    : "—";
-  document.querySelector("#metric-count").textContent =
-    `${count} ${scope === "historical" ? "historical evaluations" : "scored prospective forecasts"}`;
-  document.querySelector("#direction").textContent = count
-    ? `${((records.filter((r) => r.correct).length / count) * 100).toFixed(1)}%`
-    : "—";
-  document.querySelector("#direction-detail").textContent = count
-    ? `${records.filter((r) => r.correct).length} of ${count} directions matched`
-    : "Waiting for completed target sessions";
-  const base = count ? mean(records.map((r) => r.baseline)) : 0;
-  const improvement = base
-    ? (1 - mean(records.map((r) => r.error)) / base) * 100
-    : null;
-  document.querySelector("#baseline").innerHTML =
-    improvement === null
-      ? "—"
-      : `${Math.abs(improvement).toFixed(1)}%<small>${improvement >= 0 ? "lower error" : "higher error"}</small>`;
   document.querySelector("#all-rows").innerHTML =
     stocks
       .flatMap((s) =>
@@ -186,30 +169,6 @@ function renderMetrics() {
       )
       .join("") ||
     '<tr><td colspan="6">Results available after market close.</td></tr>';
-  const scale = Math.max(
-    0.01,
-    ...stocks.flatMap((s) =>
-      recordsFor(s).length
-        ? [
-            mean(recordsFor(s).map((r) => r.error)),
-            mean(recordsFor(s).map((r) => r.baseline)),
-          ]
-        : [],
-    ),
-  );
-  document.querySelector("#error-bars").innerHTML = count
-    ? stocks
-        .map((s) => {
-          const rows = recordsFor(s);
-          if (!rows.length) return "";
-          const m = mean(rows.map((r) => r.error)),
-            b = mean(rows.map((r) => r.baseline));
-          return `<div class="bar-row"><strong>${s.symbol}</strong><div class="bar-pair"><div class="bar" style="width:${(m / scale) * 100}%">${m.toFixed(2)} pp</div><div class="bar base" style="width:${(b / scale) * 100}%">${b.toFixed(2)} pp</div></div></div>`;
-        })
-        .join("")
-    : '<p class="empty">Your first prospective forecasts are saved. Accuracy will appear once actual closes are available.</p>';
-  document.querySelector("#evaluation-description").textContent =
-    `${scope === "historical" ? "Historical evaluation (not a live track record)" : "Prospective track record"} · ${count} scored predictions · lower error is better`;
   document.querySelector("#ledger-description").textContent =
     scope === "historical"
       ? "Historical tests, not predictions published in advance."
@@ -260,9 +219,6 @@ async function boot() {
     document.querySelector(".notice").hidden = age <= 3;
     document.querySelector(".notice").textContent =
       "These forecasts may be out of date. Waiting for the next update.";
-    document.querySelector("#run-details").textContent =
-      `${payload.runtime} · ${payload.context_sessions} input sessions · ${payload.duration_seconds}s · checkpoint ${payload.model_revision.slice(0, 12)}`;
-
     renderMetrics();
     render();
     renderLearning();
@@ -285,45 +241,6 @@ function renderLearning() {
         `<article class="tomorrow-card"><div class="stock-heading"><strong>${s.symbol}</strong><span class="muted">${s.name}</span></div><div class="muted card-caption">Predicted close</div><div class="tomorrow-price">${money(s.forecast.predicted)}</div><span class="${s.drift >= 0 ? "up" : "down"}">${pct(s.drift)} expected change</span><div class="adaptive-price"><span>Last close</span><strong>${money(s.price)}</strong></div><p class="muted">Estimated range<br>${money(s.forecast.low)} – ${money(s.forecast.high)}</p></article>`,
     )
     .join("");
-  const results = stocks
-    .flatMap((s) =>
-      (s.learning_results || []).map((r) => ({ ...r, symbol: s.symbol })),
-    )
-    .sort(
-      (a, b) =>
-        b.target.localeCompare(a.target) || a.symbol.localeCompare(b.symbol),
-    );
-  const groups = Object.groupBy(results, (r) => r.target);
-  document.querySelector("#daily-scores").innerHTML = results.length
-    ? Object.entries(groups)
-        .map(
-          ([date, rows]) =>
-            `<p><strong>${date}</strong> · Adaptive ${mean(rows.map((r) => r.score)).toFixed(1)}/100 · TimesFM ${mean(rows.map((r) => r.raw.score)).toFixed(1)}/100 · Mean absolute miss ${money(mean(rows.map((r) => r.absolute_error)))} · Reward ${mean(rows.map((r) => r.reward)).toFixed(3)} · ${rows.length} stocks</p>`,
-        )
-        .join("")
-    : "<p>No completed session yet. Scores are earned from actual outcomes, not assigned in advance.</p>";
-  const n = results.length,
-    dates = new Set(results.map((r) => r.target)).size;
-  const raw = n ? mean(results.map((r) => r.raw.normalized_loss)) : 0;
-  const adaptive = n ? mean(results.map((r) => r.normalized_loss)) : 0;
-  document.querySelector("#learning-summary").textContent = n
-    ? `${n} settled forecasts across ${dates} sessions. Adaptive mean score ${mean(results.map((r) => r.score)).toFixed(1)}/100; raw TimesFM ${mean(results.map((r) => r.raw.score)).toFixed(1)}/100. ${raw ? `Adaptive normalized squared error is ${Math.abs((1 - adaptive / raw) * 100).toFixed(1)}% ${adaptive < raw ? "lower" : "higher"} than raw TimesFM.` : ""} ${dates < 20 ? "Early evidence: fewer than 20 sessions; no improvement claim." : "Observed comparison only; future improvement is not guaranteed."}`
-    : "Learning is warming up: 0 settled adaptive forecasts. Initial weights are 60% TimesFM, 20% no-change, and 20% bias-corrected. No earned reward or accuracy score exists yet.";
-  document.querySelector("#learning-weights").innerHTML = stocks
-    .map((s) => {
-      const a = s.adaptive;
-      if (!a) return "";
-      return `<div class="weights-row"><strong>${s.symbol}</strong><span>Next forecast weights: ${a.weights.map((w, i) => `${["TimesFM", "No-change", "Corrected"][i]} ${(w * 100).toFixed(1)}%`).join(" · ")}</span><small>${a.prior_count} prior outcomes · ${a.version}</small></div>`;
-    })
-    .join("");
-  document.querySelector("#learning-ledger").innerHTML = results.length
-    ? results
-        .map(
-          (r) =>
-            `<tr><td>${r.symbol} · ${r.target}</td><td>${money(r.predicted)} / ${money(r.actual)}</td><td>${r.signed_error >= 0 ? "+" : ""}${money(r.signed_error)}</td><td>${r.score.toFixed(1)}</td><td class="${r.reward >= 0 ? "up" : "down"}">${r.reward >= 0 ? "+" : ""}${r.reward.toFixed(3)}</td></tr>`,
-        )
-        .join("")
-    : '<tr><td colspan="5">Pending the next close. Your saved predictions will be scored by the daily run.</td></tr>';
 }
 
 function configureCurrency() {

@@ -26,7 +26,7 @@ The bias correction tracks whether TimesFM tends to predict too high or too low.
 
 Only completed **prospective** forecasts train this layer. Historical test results never train it. Each outcome is processed once, and the update, outcome, and next forecast are committed together. Rerunning a job cannot rewrite an issued prediction or reward the same result twice. State is separated by stock, model revision, and strategy version (`online-v1`).
 
-This creates a feedback loop, not a promise of improvement. We compare the adaptive and original forecasts on the same future sessions. Small samples are labelled as early evidence; the 20-session display threshold is not a statistical significance test.
+This creates a feedback loop, not a promise of improvement. We compare the adaptive and original forecasts on the same future sessions. The interface reports the sample size and observed error difference; neither is a statistical significance test.
 
 ## Scores and evaluation
 
@@ -47,3 +47,14 @@ These choices draw on [forecast-error evaluation](https://otexts.com/fpp3/accura
 Historical evaluation uses ten rolling forecast origins per stock by default. Each target is excluded from its input window, but the downloaded history may include provider corrections and split restatements. This is not a fully point-in-time backtest, and pretraining overlap has not been independently ruled out.
 
 The job rejects missing sessions, invalid prices, and recent split targets. It leaves pending forecasts unscored if their reference price has materially changed. Full corporate-action reconciliation is still needed before a production rollout.
+
+## Inspecting the evidence
+
+Methodology separates two records:
+
+- **Live record:** immutable prospective prices, save times, actual outcomes when available, and the next eligible scoring checkpoint. New settlements also store the learner's state before and after the update. Older outcomes without such an audit are labelled accordingly.
+- **Historical replay:** the current saved historical predictions are passed through the same blend and update functions in chronological order. Each stock starts from the initial weights. Volatility uses prices before the target; that target's actual close updates only subsequent predictions. The replay is computed read-only and never alters the live learner.
+
+The comparison uses mean absolute price miss divided by the previous close, in percentage points. TimesFM, the adaptive blend and the unchanged-price baseline are evaluated on identical rows. The per-outcome inspector shows the three prices and before/after weights, including outcomes where adaptation made the error worse.
+
+`GET /api/evidence` returns both records. `GET /api/evidence/export` downloads the same evidence as JSON, including timestamps, revision, source hashes and state changes. These endpoints read saved data; they do not retrain TimesFM or fetch new closing prices. The daily job still supplies live outcomes.

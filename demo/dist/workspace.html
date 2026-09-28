@@ -13,7 +13,7 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c8f675'/%3E%3Cpath d='M8 8l8 10 8-10M16 18v7' fill='none' stroke='%23131716' stroke-width='4'/%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="workspace-theme.css" />
+    <link rel="stylesheet" href="workspace-theme.css?v=3" />
   </head>
   <body>
     <aside>
@@ -232,179 +232,140 @@
           </section>
         </section>
         <section id="methodology" hidden>
-          <p class="muted">
-            Optional details about our forecasts, scoring, and learning process.
-          </p>
-          <p id="run-details" class="muted"></p>
-          <div class="metrics">
-            <article>
-              <span>Stocks in your universe</span
-              ><strong>6 <small>US equities</small></strong>
-              <p>One market. Multiple perspectives.</p>
-            </article>
-            <article>
-              <span>Mean absolute return error</span><strong id="mae">—</strong>
-              <p id="metric-count">Loading evaluations</p>
-            </article>
-            <article>
-              <span>Direction accuracy</span><strong id="direction">—</strong>
-              <p id="direction-detail"></p>
-            </article>
-            <article>
-              <span>Compared with no-change</span
-              ><strong id="baseline">—</strong>
-              <p>Return error versus the baseline</p>
-            </article>
+          <div class="evidence-toolbar">
+            <div class="evidence-tabs" role="group" aria-label="Evidence type">
+              <button id="evidence-live" type="button" aria-pressed="true">
+                Live record</button
+              ><button id="evidence-replay" type="button" aria-pressed="false">
+                Historical replay
+              </button>
+            </div>
+            <a href="/api/evidence/export" class="evidence-download" download
+              >Download evidence ↗</a
+            >
           </div>
-          <div class="panel">
-            <div class="panel-heading">
-              <div>
-                <h2>Prediction error by company</h2>
-                <p id="evaluation-description">
-                  Mean absolute return error · lower is better
-                </p>
-              </div>
-              <div class="legend">
-                <span><i class="predicted"></i>Model</span
-                ><span><i class="actual"></i>No-change baseline</span>
-              </div>
+          <p id="evidence-loading" role="status">Reading saved forecasts…</p>
+          <div id="evidence-content" hidden>
+            <div class="evidence-intro">
+              <span id="evidence-kicker" class="eyebrow"></span>
+              <h2 id="evidence-headline"></h2>
+              <p id="evidence-description"></p>
             </div>
-            <div id="error-bars"></div>
-          </div>
-          <section class="panel ledger">
-            <div class="panel-heading">
-              <div>
-                <h2>The learning loop</h2>
+            <div id="evidence-stats" class="evidence-stats"></div>
+            <section id="pending-evidence" class="evidence-panel" hidden>
+              <div class="evidence-panel-heading">
+                <div>
+                  <span class="eyebrow">THE NEXT CHECKPOINT</span>
+                  <h3>Predictions are saved. Outcomes come next.</h3>
+                </div>
+                <span id="evidence-due" class="pill"></span>
+              </div>
+              <div class="evidence-steps">
+                <div class="complete">
+                  <span>01</span><strong>Saved before the session</strong>
+                </div>
+                <div>
+                  <span>02</span><strong>Observe the closing price</strong>
+                </div>
+                <div><span>03</span><strong>Compare and update</strong></div>
+              </div>
+              <p id="evidence-next" class="muted"></p>
+              <details>
+                <summary>Inspect the saved predictions</summary>
+                <div class="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Company / target</th>
+                        <th>TimesFM · USD</th>
+                        <th>Adaptive · USD</th>
+                        <th>Saved at · UTC</th>
+                      </tr>
+                    </thead>
+                    <tbody id="evidence-pending-rows"></tbody>
+                  </table>
+                </div>
+              </details>
+            </section>
+            <section id="evidence-comparison" class="evidence-panel" hidden>
+              <div class="evidence-panel-heading">
+                <div>
+                  <span class="eyebrow">SAME OUTCOMES, THREE APPROACHES</span>
+                  <h3>Did the adjustment reduce error?</h3>
+                </div>
+                <span class="muted">Lower is better</span>
+              </div>
+              <div id="evidence-chart"></div>
+              <p id="evidence-comparison-note" class="muted"></p>
+            </section>
+            <section id="evidence-audit" class="evidence-panel" hidden>
+              <div class="evidence-panel-heading">
+                <div>
+                  <span class="eyebrow">INSPECT AN UPDATE</span>
+                  <h3>What changed after an outcome?</h3>
+                </div>
+                <label
+                  >Saved outcome
+                  <select
+                    id="evidence-outcome"
+                    aria-label="Select an outcome"
+                  ></select
+                ></label>
+              </div>
+              <div id="evidence-audit-body"></div>
+            </section>
+            <div class="evidence-basics">
+              <article>
+                <span class="eyebrow">PRICE MODEL</span>
+                <h3>History in. One session ahead.</h3>
                 <p>
-                  Forecast → observe the close → score the miss → update the
-                  next forecast
+                  TimesFM 2.5 uses 256 previous stock closes. Its pretrained
+                  weights stay frozen. The adaptive layer blends its estimate
+                  with a no-change baseline and a bias correction.
                 </p>
-              </div>
-              <span class="pill">EXPERIMENTAL</span>
-            </div>
-            <div class="learning-explainer">
-              <p>
-                <strong>Adaptive blend:</strong> TimesFM, no-change, and
-                bias-corrected TimesFM. Better performers gain relative weight;
-                large mistakes lose weight. TimesFM’s pretrained weights stay
-                frozen.
-              </p>
-              <p>
-                <strong>Score:</strong> 100 / (1 + z²), where z is the return
-                error divided by prior 20-session volatility (minimum 0.5%). A
-                perfect prediction scores 100; a one-volatility miss scores 50.
-                This is a quality index, not a probability or “percent correct.”
-              </p>
-              <p>
-                <strong>Reward:</strong> baseline squared error − forecast
-                squared error, both volatility-normalized. Positive beats
-                no-change; negative earns a penalty. Direction accuracy is
-                reported separately.
-              </p>
-              <p id="learning-summary"></p>
-            </div>
-            <div id="learning-weights"></div>
-          </section>
-          <section class="panel ledger">
-            <div class="panel-heading">
-              <div>
-                <h2>Daily scores</h2>
+              </article>
+              <article>
+                <span class="eyebrow">RESEARCH AGENT</span>
+                <h3>Context, in a separate lane.</h3>
                 <p>
-                  Average quality score across settled stocks for each target
-                  session
+                  Gemini analyses commodity headlines and builds an evidence
+                  map. It does not train TimesFM or change these stock
+                  forecasts.
                 </p>
-              </div>
+              </article>
             </div>
-            <div id="daily-scores" class="learning-explainer"></div>
-          </section>
-          <section class="panel ledger">
-            <div class="panel-heading">
-              <div>
-                <h2>Daily forecast report card</h2>
-                <p>
-                  Settled adaptive predictions only · scores appear after the
-                  daily job observes actual prices
-                </p>
-              </div>
-            </div>
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>STOCK / SESSION</th>
-                    <th>ADAPTIVE / ACTUAL</th>
-                    <th>MISS (PRED − ACTUAL)</th>
-                    <th>SCORE / 100</th>
-                    <th>REWARD / PENALTY</th>
-                  </tr>
-                </thead>
-                <tbody id="learning-ledger"></tbody>
-              </table>
-            </div>
-          </section>
-          <div class="method-grid">
-            <article class="panel method">
-              <div class="eyebrow">01 / THE QUESTION</div>
-              <h2>One trading session ahead.</h2>
+            <details class="evidence-technical">
+              <summary>Model reference and measurement details</summary>
               <p>
-                Given the information available after today’s market close,
-                estimate the next trading session’s closing price.
+                Error is the absolute price miss divided by the previous close,
+                expressed in percentage points. The chart compares the mean
+                error on the same outcomes. Baseline means predicting an
+                unchanged closing price.
               </p>
               <p>
-                The job uses the US exchange calendar, excludes unfinished
-                sessions, and waits an hour after close. Inputs use Yahoo
-                closing prices; recent split targets are rejected for review.
-              </p>
-            </article>
-            <article class="panel method">
-              <div class="eyebrow">02 / THE MODEL</div>
-              <h2>TimesFM, with a benchmark.</h2>
-              <p>
-                TimesFM 2.5 runs locally in a separate Python job. Every
-                forecast will be compared with a simple no-change baseline:
-                tomorrow’s close equals today’s.
+                Historical forecasts were generated after the fact from
+                downloaded data. The replay applies updates in chronological
+                order, but provider revisions and model pretraining overlap
+                remain possible. It is not a live record or proof of a trading
+                advantage.
               </p>
               <p>
-                The model uses 256 completed closing prices to predict one
-                session ahead. Shading shows its 10th–90th quantiles; coverage
-                is not calibrated or guaranteed.
+                <a
+                  href="https://github.com/google-research/timesfm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >TimesFM model reference ↗</a
+                >
+                ·
+                <a
+                  href="https://github.com/sumitsharma01/YodaX/blob/main/docs/model.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Implementation and scoring ↗</a
+                >
               </p>
-            </article>
-            <article class="panel method">
-              <div class="eyebrow">03 / THE MEASUREMENT</div>
-              <h2>Results you can inspect.</h2>
-              <p>
-                Absolute return error = |predicted close − actual close| ÷
-                previous close × 100, measured in percentage points.
-              </p>
-              <p>
-                Direction accuracy compares the signs of predicted and actual
-                changes. Scores are calculated from actual model outputs and
-                observed closes. The evaluation selector separates retrospective
-                tests from prospective results.
-              </p>
-            </article>
-            <article class="panel method">
-              <div class="eyebrow">04 / THE RECORD</div>
-              <h2>Publish. Preserve. Evaluate.</h2>
-              <p>
-                Saved forecasts retain their generation time, target session,
-                checkpoint revision, and input snapshot hash. Reruns do not
-                overwrite predictions; they score pending outcomes.
-              </p>
-              <p>
-                The Tomorrow section includes an experimental adaptive blend. It
-                learns only from scored prospective records, and is compared
-                against the unchanged raw TimesFM forecast. Improvement is not
-                guaranteed.
-              </p>
-              <p>
-                Historical tests use data downloaded today and may contain
-                provider revisions or pretraining overlap. They are not
-                point-in-time backtests or evidence of trading profitability.
-                Yahoo data is used for local personal research.
-              </p>
-            </article>
+              <p id="evidence-provenance"></p>
+            </details>
           </div>
         </section>
         <section id="future" hidden>
@@ -558,7 +519,8 @@
         </footer>
       </main>
     </div>
-    <script src="app.js?v=2"></script>
-    <script src="future.js?v=2"></script>
+    <script src="app.js?v=3"></script>
+    <script src="future.js?v=3"></script>
+    <script src="methodology.js?v=2"></script>
   </body>
 </html>

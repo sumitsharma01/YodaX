@@ -11,7 +11,7 @@ The homepage introduces YodaX with an animated signal graphic, feature overview 
 | Overview | Select a company, explore price history, and see the next-session forecast and estimated range. |
 | Tomorrow | See the saved forecasts for the next stock trading session. |
 | Track record | Compare published predictions with actual closes, or inspect historical tests separately. |
-| Methodology | Read about the model, scoring and experimental learning layer. |
+| Methodology | Inspect live predictions, historical replay comparisons, before/after weight changes and downloadable evidence. |
 | Future Market | Chat about a commodity, ask follow-ups, and inspect each answer's linked evidence map. |
 
 The currency selector converts stock prices into USD, INR, EUR, GBP, JPY or CAD. It changes the display, not the model's inputs or percentage returns.
