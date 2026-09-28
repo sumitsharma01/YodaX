@@ -37,9 +37,12 @@
   }
   new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;},{threshold:.15}).observe(stage);
   reduced.addEventListener('change',()=>{paused=reduced.matches;companyPaused=reduced.matches;companyState();controls();});
-  fetch('world-map.json').then(response=>{if(!response.ok)throw new Error('Map unavailable');return response.json();}).then(features=>{
+  fetch('world-map.json?v=8').then(response=>{if(!response.ok)throw new Error('Map unavailable');return response.json();}).then(features=>{
     const fragment=document.createDocumentFragment();
     for(const feature of features){const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',feature.path);path.setAttribute('class','map-country');
+      const continentDelays={'North America':0,'South America':.7,'Europe':1.4,'Africa':2.1,'Asia':2.8,'Oceania':3.5,'Seven seas (open ocean)':3.5};
+      if(Object.hasOwn(continentDelays,feature.continent)){path.classList.add('continent-pulse');path.style.setProperty('--continent-delay',-continentDelays[feature.continent]+'s');}
+
       const region=({'United States of America':'usa','China':'china','India':'india','Germany':'germany','Japan':'japan','United Kingdom':'uk'})[feature.name]||null;
       if(region){path.classList.add('featured');path.dataset.region=region;path.setAttribute('role','button');path.setAttribute('tabindex','0');path.setAttribute('aria-label','Explore '+feature.name+' market signal');path.addEventListener('click',()=>inspect(region));path.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();inspect(region);}});}
       else path.setAttribute('aria-hidden','true');fragment.append(path);

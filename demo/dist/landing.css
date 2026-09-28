@@ -872,3 +872,20 @@ footer small {
 .country-point:nth-of-type(3n) .point-core{animation-delay:-1.6s}
 @keyframes live-signal-glow{0%,100%{opacity:.6;filter:drop-shadow(0 0 2px #eeeada)}50%{opacity:1;filter:drop-shadow(0 0 8px #eeeada)}}
 @media(prefers-reduced-motion:reduce){.world-stage .point-core{animation:none!important}}
+
+/* Country outlines in each continent breathe together, without Antarctica. */
+.world-stage[data-step="0"] .continent-pulse,
+.world-stage[data-step="1"] .continent-pulse {
+  animation: continent-breathe 5.6s ease-in-out infinite;
+  animation-delay: var(--continent-delay, 0s);
+}
+@keyframes continent-breathe {
+  0%, 100% { fill: #272720; stroke: #494942; }
+  45% { fill: #55554a; stroke: #8f8d79; }
+}
+.world-stage .continent-pulse.featured { stroke-width: 1.1; }
+.world-stage .continent-pulse:hover,
+.world-stage .continent-pulse:focus-visible { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .world-stage .continent-pulse { animation: none !important; }
+}

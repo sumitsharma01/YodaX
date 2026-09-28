@@ -119,7 +119,7 @@ Connecting research to TimesFM is future work. That requires numerical features 
 
 ## Homepage product story
 
-The homepage has a looping company strip and an interactive, four-chapter world map: news signals, growing demand, historical context and an illustrative outlook. Select any of the six country signals or the historical-data book to inspect the input, or use the chapter buttons and pause control. Signals pulse in place during Signals and Demand. Connections and traveling particles activate only after the YodaX agent appears in Connect, then disappear for Outlook. Reduced-motion preferences disable automatic playback.
+The homepage has a looping company strip and an interactive, four-chapter world map: news signals, growing demand, historical context and an illustrative outlook. Select any of the six country signals or the historical-data book to inspect the input, or use the chapter buttons and pause control. Signals pulse in place during Signals and Demand. Country outlines pulse together by continent with staggered timing to convey worldwide activity; Antarctica is excluded. Connections and traveling particles activate only after the YodaX agent appears in Connect, then disappear for Outlook. Reduced-motion preferences disable automatic playback.
 
 This animation is a product concept. Its headlines and outlook are illustrative, and it makes no AI requests. Commodity research and TimesFM price forecasting still run separately.
 
