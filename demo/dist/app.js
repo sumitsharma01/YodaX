@@ -49,32 +49,70 @@ function row(r, label) {
   return `<tr><td>${label || r.date}</td><td>${money(r.predicted)}</td><td>${money(r.actual)}</td><td>${money(Math.abs(delta))} ${delta > 0 ? "too high" : delta < 0 ? "too low" : "exact"}</td><td><span class="result ${r.correct ? "" : "miss"}">${r.correct ? "Correct" : "Missed"}</span></td><td>${r.scoring ? r.scoring.score.toFixed(0) : "Not available"}</td></tr>`;
 }
 function chart() {
-  const values = selected.history.slice(-range),
-    forecast = selected.forecast.predicted,
-    lo = selected.forecast.low,
-    hi = selected.forecast.high,
-    min = Math.min(...values, lo) * 0.99,
-    max = Math.max(...values, hi) * 1.01;
-  const y = (v) => 210 - ((v - min) / (max - min)) * 185;
-  const x = (i) => 14 + (i / (values.length - 1)) * 627;
-  const path = values
-    .map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(2)},${y(v).toFixed(2)}`)
-    .join(" ");
-  const ticks = Array.from({ length: 5 }, (_, i) => {
-    const v = min + ((max - min) * i) / 4;
-    return `<line x1="14" x2="742" y1="${y(v)}" y2="${y(v)}" stroke="#303029" stroke-dasharray="3 5"/><text x="751" y="${y(v) + 4}" fill="#92968a" font-size="11">${(v * fxRate()).toLocaleString("en-US", { maximumFractionDigits: 0 })}</text>`;
+  const svg = document.querySelector("#price-chart");
+  const mode = document.querySelector("#chart-mode").value;
+  const returns = mode === "returns";
+  const start = Math.max(1, selected.history.length - range);
+  const prices = selected.history.slice(start), dates = selected.dates.slice(start);
+  const values = returns ? prices.map((v,i)=>v/selected.history[start+i-1]-1) : prices;
+  const averages = prices.map((_,i)=>{
+    const end=start+i+1;
+    return end>=20 ? mean(selected.history.slice(end-20,end)) : null;
+  });
+  const showAverage = !returns && document.querySelector("#chart-average").checked;
+  const f=selected.forecast, format=returns?pct:money;
+  const plotted = [...values,...(returns?[0]:[f.low,f.high]),...(showAverage?averages.filter(v=>v!==null):[])];
+  const low=Math.min(...plotted), high=Math.max(...plotted), pad=(high-low||Math.abs(high)||1)*.12;
+  const min=low-pad,max=high+pad;
+  const y=v=>210-(v-min)/(max-min)*185;
+  const x=i=>20+i/Math.max(1,values.length-1)*(returns?700:620);
+  const path=vs=>vs.map((v,i)=>v===null?"":`${i&&vs[i-1]!==null?"L":"M"}${x(i)},${y(v)}`).join(" ");
+  const ticks=Array.from({length:5},(_,i)=>{
+    const v=min+(max-min)*i/4;
+    return `<line x1="20" x2="730" y1="${y(v)}" y2="${y(v)}" stroke="#303029" stroke-dasharray="3 5"/><text x="740" y="${y(v)+4}" fill="#a5a59b" font-size="10">${returns?(v*100).toFixed(1)+"%":(v*fxRate()).toFixed(0)}</text>`;
   }).join("");
-  document.querySelector("#price-chart").innerHTML =
-    `<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0dfd6" stop-opacity=".16"/><stop offset="1" stop-color="#e0dfd6" stop-opacity="0"/></linearGradient></defs>${ticks}<rect x="642" y="12" width="99" height="201" fill="#e0dfd6" opacity=".025"/><path d="${path} L641,214 L14,214 Z" fill="url(#fill)"/><path d="${path}" fill="none" stroke="#bdbeb2" stroke-width="2.5" stroke-linejoin="round"/><path d="M641,${y(selected.price)} L719,${y(hi)} L719,${y(lo)} Z" fill="#e0dfd6" opacity=".13"/><line x1="641" x2="641" y1="12" y2="215" stroke="#787d6d" stroke-dasharray="4 5"/><path d="M641,${y(selected.price)} L719,${y(forecast)}" fill="none" stroke="#e0dfd6" stroke-width="2.5" stroke-dasharray="5 4"/><circle cx="719" cy="${y(forecast)}" r="5" fill="#e0dfd6"/><text x="660" y="${Math.max(12, y(hi) - 9)}" fill="#e0dfd6" font-size="11">FORECAST</text><text x="14" y="243" fill="#92968a" font-size="11">${shortDate(selected.dates.slice(-range)[0])}</text><text x="310" y="243" fill="#92968a" font-size="11">${shortDate(selected.dates.slice(-range)[Math.floor(values.length / 2)])}</text><text x="611" y="243" fill="#92968a" font-size="11">${shortDate(selected.forecast.cutoff)}</text><text x="698" y="243" fill="#e0dfd6" font-size="11">${shortDate(selected.forecast.target)}</text>`;
-  document
-    .querySelector("#price-chart")
-    .setAttribute(
-      "aria-label",
-      `${selected.name}: ${range} historical sessions, forecast ${money(forecast)}, model quantile range ${money(lo)} to ${money(hi)}`,
-    );
-  document.querySelector("#range-label").textContent =
-    `Estimated range ${money(lo)} – ${money(hi)}`;
+  const marks=returns?values.map((v,i)=>`<rect x="${x(i)-Math.max(1,280/values.length)}" y="${Math.min(y(0),y(v))}" width="${Math.max(2,560/values.length)}" height="${Math.max(1,Math.abs(y(v)-y(0)))}" fill="${v>=0?"#a3b7a0":"#ca9990"}"/>`).join(""):`
+    ${mode==="area"?`<path d="${path(values)} L640,215 L20,215Z" fill="#d8d7cc" opacity=".09"/>`:""}
+    <path d="${path(values)}" fill="none" stroke="#dad9ce" stroke-width="2"/>
+    ${showAverage?`<path d="${path(averages)}" fill="none" stroke="#b7a77e" stroke-width="1.8"/>`:""}
+    <path d="M640,${y(prices.at(-1))} L720,${y(f.high)} L720,${y(f.low)}Z" fill="#dddccf" opacity=".12"/>
+    <path d="M640,${y(prices.at(-1))} L720,${y(f.predicted)}" fill="none" stroke="#dddccf" stroke-width="2" stroke-dasharray="5 4"/>
+    <circle class="chart-beacon" cx="640" cy="${y(prices.at(-1))}" r="6" fill="none" stroke="#dddccf"/>
+    <circle cx="720" cy="${y(f.predicted)}" r="4" fill="#dddccf"/>
+    <text x="664" y="16" fill="#aaa99f" font-size="10">FORECAST</text>`;
+  svg.innerHTML=ticks+marks+`<text x="20" y="243" fill="#aaa99f" font-size="11">${shortDate(dates[0])}</text><text x="590" y="243" fill="#aaa99f" font-size="11">${shortDate(dates.at(-1))}</text><g id="chart-cursor" visibility="hidden"><line y1="20" y2="215" stroke="#e0dfd6" stroke-dasharray="3 4"/><circle r="4" fill="#e0dfd6"/></g>`;
+  svg.setAttribute("tabindex","0");
+  svg.setAttribute("aria-label",`${selected.name} ${returns?"daily returns":"closing prices"}. Use left and right arrows to inspect sessions.`);
+  const readout=document.querySelector("#chart-readout");
+  const hint="Hover over the chart or use ← → to inspect · Daily closing data";
+  readout.textContent=hint;
+  document.querySelector("#chart-legend").textContent=returns?"Daily return · green: gain / rose: loss":`Closing price · dashed: forecast${showAverage?" · gold: 20-session average":""}`;
+  document.querySelector("#chart-average").disabled=returns;
+  let index=values.length-1;
+  function inspect(i){
+    index=Math.max(0,Math.min(values.length,i));
+    const future=index===values.length;
+    if(returns&&future)index=values.length-1;
+    const isForecast=!returns&&index===values.length;
+    const px=isForecast?720:x(index), val=isForecast?f.predicted:values[index];
+    const cursor=svg.querySelector("#chart-cursor");cursor.setAttribute("visibility","visible");
+    cursor.querySelector("line").setAttribute("x1",px);cursor.querySelector("line").setAttribute("x2",px);
+    cursor.querySelector("circle").setAttribute("cx",px);cursor.querySelector("circle").setAttribute("cy",y(val));
+    readout.textContent=isForecast?`${f.target} · Forecast ${money(val)} · Range ${money(f.low)} – ${money(f.high)}`:`${dates[index]} · ${returns?"Daily return":"Close"} ${format(val)}${showAverage&&averages[index]!==null?" · SMA 20 "+money(averages[index]):""}`;
+  }
+  svg.onpointermove=e=>{
+    const matrix=svg.getScreenCTM();if(!matrix)return;
+    const point=new DOMPoint(e.clientX,e.clientY).matrixTransform(matrix.inverse());
+    inspect(!returns&&point.x>680?values.length:Math.round((point.x-20)/(returns?700:620)*(values.length-1)));
+  };
+  svg.onpointerleave=()=>{svg.querySelector("#chart-cursor").setAttribute("visibility","hidden");readout.textContent=hint;};
+  svg.onfocus=()=>inspect(index);
+  svg.onkeydown=e=>{if(["ArrowLeft","ArrowRight","Home","End"].includes(e.key)){e.preventDefault();inspect(e.key==="Home"?0:e.key==="End"?values.length:index+(e.key==="ArrowRight"?1:-1));}};
+  document.querySelector("#range-label").textContent=returns?"Change from the previous session’s close":`Estimated range ${money(f.low)} – ${money(f.high)}`;
 }
+document.querySelector("#chart-mode").onchange=()=>{if(selected)chart();};
+document.querySelector("#chart-average").onchange=()=>{if(selected)chart();};
+
 function render() {
   document.querySelector("#recent-rows").closest("table").tHead.hidden =
     !selected.records.some((r) => r.kind === "prospective");

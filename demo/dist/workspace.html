@@ -13,7 +13,7 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c8f675'/%3E%3Cpath d='M8 8l8 10 8-10M16 18v7' fill='none' stroke='%23131716' stroke-width='4'/%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="workspace-theme.css?v=3" />
+    <link rel="stylesheet" href="workspace-theme.css?v=10" />
   </head>
   <body>
     <aside>
@@ -131,11 +131,9 @@
                 </div>
               </div>
               <div class="chart-toolbar">
-                <div class="legend">
-                  <span><i class="actual"></i>Historical close</span
-                  ><span><i class="predicted"></i>Forecast</span
-                  ><span class="interval-key">Estimated range</span>
-                </div>
+                <div class="legend" id="chart-legend">Closing price · dashed: forecast</div>
+                <label>View <select id="chart-mode"><option value="area">Price area</option><option value="line">Price line</option><option value="returns">Daily returns</option></select></label>
+                <label><input id="chart-average" type="checkbox"/> SMA 20</label>
                 <div class="segmented" aria-label="Chart history">
                   <button data-range="21" class="active">1M</button
                   ><button data-range="63">3M</button
@@ -150,6 +148,7 @@
                   aria-label="Historical closing prices and next-session forecast"
                 ></svg>
               </div>
+              <p id="chart-readout" aria-live="polite"></p>
               <div class="forecast-footer">
                 <span>Forecast for <strong>—</strong></span
                 ><span id="range-label"></span>
@@ -519,7 +518,7 @@
         </footer>
       </main>
     </div>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=10"></script>
     <script src="future.js?v=3"></script>
     <script src="methodology.js?v=2"></script>
   </body>
