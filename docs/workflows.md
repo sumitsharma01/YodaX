@@ -116,3 +116,13 @@ The Gemini key stays in the server environment or ignored `.env` file. Model wei
 The working demo includes stock forecasts, outcome scoring, adaptive blending, currency display, commodity chat and evidence maps. Commodity research currently uses headlines rather than full articles or production datasets. It provides qualitative scenarios, not validated commodity price forecasts.
 
 Connecting research to TimesFM is future work. That requires numerical features with reliable timestamps, leakage-safe evaluation, and a prospective record showing whether those features improve predictions. Public deployment also needs authentication, per-user limits, a durable job queue, monitoring and appropriately licensed data.
+
+## Homepage product story
+
+The homepage has a looping company strip and an interactive, four-chapter world map: news signals, growing demand, historical context and an illustrative outlook. Select any of the seven continent signals or the historical-data book to inspect the input, or use the chapter buttons and pause control. Reduced-motion preferences disable automatic playback.
+
+This animation is a product concept. Its headlines and outlook are illustrative, and it makes no AI requests. Commodity research and TimesFM price forecasting still run separately.
+
+Country outlines are bundled locally in `demo/dist/world-map.json`, simplified from the public-domain [Natural Earth 1:110m countries dataset](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/). Animation behavior lives in `world-story.js`.
+
+The map includes North America, South America, Europe, Africa, Asia, Oceania and Antarctica. Antarctic context represents climate observations and possible indirect effects, not local commodity demand. All seven signals are hypothetical.

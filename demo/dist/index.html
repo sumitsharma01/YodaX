@@ -8,7 +8,7 @@
       content="Connect market history with a clearer view of what comes next. Explore YodaX stock forecasts, commodity research and linked evidence."
     />
     <title>YodaX — A clearer view of what comes next</title>
-    <link rel="stylesheet" href="landing.css" />
+    <link rel="stylesheet" href="landing.css?v=2" />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23eeeae1'/%3E%3Cpath d='M8 8l8 10 8-10M16 18v7' fill='none' stroke='%2310100e' stroke-width='4'/%3E%3C/svg%3E"
@@ -88,15 +88,26 @@
       </section>
       <section class="universe">
         <p>A focused view of the companies shaping the market.</p>
-        <div>
-          <span>Apple</span><span class="microsoft">⊞ Microsoft</span
-          ><span>Google</span><span class="tesla">TESLA</span><span>NVIDIA</span
-          ><span>amazon</span>
-        </div>
+        <div class="company-marquee" tabindex="0" aria-label="Forecast coverage: Apple, Microsoft, Google, Tesla, NVIDIA and Amazon. Pause motion on hover or focus."><div class="company-track"><div class="company-set"><span>Apple</span><span class="microsoft">⊞ Microsoft</span><span>Google</span><span class="tesla">TESLA</span><span>NVIDIA</span><span>amazon</span></div><div class="company-set" aria-hidden="true"><span>Apple</span><span class="microsoft">⊞ Microsoft</span><span>Google</span><span class="tesla">TESLA</span><span>NVIDIA</span><span>amazon</span></div></div></div>
+        <button class="motion-toggle" id="company-motion" type="button" aria-pressed="false">Pause motion Ⅱ</button>
         <small
           >Current forecast universe · company names identify coverage, not
           partnerships.</small
         >
+      </section>
+      <section class="world-story" id="world-story" aria-labelledby="world-title">
+        <div class="world-heading"><div><p class="overline">A WORLD OF SIGNALS. ONE CONNECTED VIEW.</p><h2 id="world-title">See the bigger picture.<br><span>Before the next move.</span></h2></div><p>Follow a signal across the world. Explore how news and historical context could come together in a forecast.</p></div>
+        <div class="world-stage" id="world-stage" data-step="0">
+          <div class="world-stage-top"><span><i></i> THE SIGNAL JOURNEY</span><span>ILLUSTRATIVE PRODUCT CONCEPT</span></div>
+          <div class="world-map-wrap"><svg id="world-map" viewBox="0 0 1000 540" role="group" aria-label="Interactive world map: explore illustrative signals from all seven continents"><defs><radialGradient id="map-light"><stop stop-color="#b8c0a4" stop-opacity=".13"/><stop offset="1" stop-color="#b8c0a4" stop-opacity="0"/></radialGradient><filter id="signal-glow"><feGaussianBlur stdDeviation="3"/></filter></defs><ellipse cx="500" cy="270" rx="440" ry="245" fill="url(#map-light)"/><g id="world-countries" transform="translate(0 40)"></g><g class="signal-routes"><path id="route-usa" d="M235 179 Q500 179 500 390"/><path id="route-south-america" d="M340 335 Q500 335 500 390"/><path id="route-europe" d="M520 135 Q500 135 500 390"/><path id="route-africa" d="M535 265 Q500 265 500 390"/><path id="route-china" d="M792 189 Q500 189 500 390"/><path id="route-oceania" d="M867 355 Q500 355 500 390"/><path id="route-antarctica" d="M440 488 Q500 488 500 390"/><path id="route-history" d="M760 450 C650 475 570 450 500 390"/></g><g class="flow-particles"><circle id="dot-usa" r="3"/><circle id="dot-south-america" r="3"/><circle id="dot-europe" r="3"/><circle id="dot-africa" r="3"/><circle id="dot-china" r="3"/><circle id="dot-oceania" r="3"/><circle id="dot-antarctica" r="3"/><circle id="dot-history" r="3"/></g><g class="country-point" data-region="usa" tabindex="0" role="button" aria-label="Explore North America signal" transform="translate(235 179)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">NORTH AMERICA</text><text class="signal-caption" y="-12" text-anchor="middle">Manufacturing demand</text></g><g class="country-point" data-region="south-america" tabindex="0" role="button" aria-label="Explore South America signal" transform="translate(340 335)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">SOUTH AMERICA</text><text class="signal-caption" y="-12" text-anchor="middle">Copper supply tightens</text></g><g class="country-point" data-region="europe" tabindex="0" role="button" aria-label="Explore Europe signal" transform="translate(520 135)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">EUROPE</text><text class="signal-caption" y="-12" text-anchor="middle">Energy demand grows</text></g><g class="country-point" data-region="africa" tabindex="0" role="button" aria-label="Explore Africa signal" transform="translate(535 265)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">AFRICA</text><text class="signal-caption" y="-12" text-anchor="middle">Mineral exports shift</text></g><g class="country-point" data-region="china" tabindex="0" role="button" aria-label="Explore Asia signal" transform="translate(792 189)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">ASIA</text><text class="signal-caption" y="-12" text-anchor="middle">Infrastructure demand</text></g><g class="country-point" data-region="oceania" tabindex="0" role="button" aria-label="Explore Oceania signal" transform="translate(867 355)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">OCEANIA</text><text class="signal-caption" y="-12" text-anchor="middle">Iron ore supply changes</text></g><g class="country-point" data-region="antarctica" tabindex="0" role="button" aria-label="Explore Antarctica signal" transform="translate(440 488)"><circle class="point-halo" r="24"/><circle class="point-ring" r="13"/><circle class="point-core" r="4"/><text y="-24" text-anchor="middle">ANTARCTICA</text><text class="signal-caption" y="-12" text-anchor="middle">Climate observations</text></g></svg>
+          <button class="history-book" id="history-book" type="button" aria-label="Explore the historical data input"><span class="book-pages"></span><span class="book-cover"><span>Y / ARCHIVE</span><strong>Historical<br>data.</strong><span class="book-chart">▁ ▃ ▂ ▅ ▄ ▆</span><small>THE CONTEXT BEHIND THE SIGNAL</small></span></button>
+          <div class="world-agent"><div class="agent-orbit"></div><div class="agent-core">✳</div><span>YodaX agent</span><small>Connecting the context</small></div>
+          <div class="world-result"><span class="overline">CONTEXT → POSSIBLE OUTCOME</span><h3>Demand signals,<br>put in perspective.</h3><svg viewBox="0 0 280 65" aria-hidden="true"><path d="M5 55L35 47L60 50L85 35L110 40L135 22L165 28L190 17" fill="none" stroke="#a8ada0" stroke-width="1.5"/><path d="M190 17L275 2L275 35Z" fill="#d7ddc0" opacity=".12"/><path d="M190 17L275 10" fill="none" stroke="#e5e8d9" stroke-dasharray="4 4"/><circle cx="275" cy="10" r="3" fill="#e5e8d9"/></svg><p>Illustrative forecast · not a live prediction</p><div class="result-brand">✳ YodaX</div></div>
+          </div>
+          <div class="world-inspector" id="world-inspector"><span id="world-inspector-label">EXPLORE THE MAP</span><p id="world-inspector-copy">Click the USA, China or the historical-data book to inspect its role.</p></div>
+          <div class="world-controls"><div class="world-chapters" role="group" aria-label="Animation chapters"><button data-chapter="0" aria-pressed="true">01 <span>Signals</span></button><button data-chapter="1" aria-pressed="false">02 <span>Demand</span></button><button data-chapter="2" aria-pressed="false">03 <span>Connect</span></button><button data-chapter="3" aria-pressed="false">04 <span>Outlook</span></button></div><button id="world-play" type="button" aria-pressed="false" aria-label="Pause product animation">Ⅱ</button></div>
+        </div>
+        <p class="world-disclaimer">A vision of connected research. Today, YodaX’s news research and historical-price forecasts run separately. The signals above are illustrative. Map: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener noreferrer">Natural Earth</a>.</p>
       </section>
       <section class="platform" id="possibilities">
         <div class="section-heading">
@@ -309,6 +320,6 @@
         >
       </footer>
     </main>
-    <script src="landing.js"></script>
+    <script src="landing.js"></script><script src="world-story.js"></script>
   </body>
 </html>
