@@ -861,3 +861,11 @@ footer small {
 .point-ring{transition:r 2s,stroke-width 2s,fill 2s}
 .world-stage[data-step="2"] .signal-caption{opacity:.45}
 @media(max-width:560px){#world-map{width:100%;left:0;height:auto;top:15px}.country-point text{font-size:10px;letter-spacing:0}.country-point .signal-caption{display:none}.world-map-wrap{min-height:360px}}
+
+/* Keep every connection visible; the connect chapter intensifies the flow. */
+.world-stage .signal-routes path{opacity:.42;stroke-width:1.5;stroke-dasharray:4 6;vector-effect:non-scaling-stroke}
+.world-stage[data-step="1"] .signal-routes path{opacity:.65}
+.world-stage[data-step="2"] .signal-routes path{opacity:.95;stroke:#e2e1d6}
+.world-stage .flow-particles circle{opacity:.8}
+.world-stage[data-step="3"] .signal-routes path{opacity:.18}
+.world-stage[data-step="3"] .flow-particles circle{opacity:0}
