@@ -8,8 +8,9 @@
     height = 0,
     frame = 0,
     visible = true;
-  let pointer = 0,
-    targetPointer = 0;
+  const motion = { x: 0, y: 0, hover: 0 };
+  const target = { x: 0, y: 0, hover: 0 };
+  function resetPointer() { target.x = target.y = target.hover = 0; }
   function resize() {
     const rect = canvas.getBoundingClientRect();
     width = rect.width;
@@ -27,19 +28,37 @@
     const centre =
       width * (0.49 + 0.21 * Math.sin(t * Math.PI * 3.6 + time * 0.1));
     const ribbon = width * 0.21 * envelope;
-    return {
+    const base = {
       x:
         centre +
         Math.cos(twist) * ribbon +
         Math.sin(t * 6 + strand * 0.05) * width * 0.05 +
-        pointer * 18,
+        0,
       y: height * (0.07 + t * 0.85) + Math.sin(twist) * height * 0.06,
       z: (Math.sin(twist) + 1) / 2,
+    };
+    // Rotate the ribbon in depth toward the cursor, then project onto the canvas.
+    const zoom = 1 + motion.hover * 0.16;
+    const x = (base.x - width / 2) * zoom;
+    const y = (base.y - height / 2) * zoom;
+    const z = (base.z - 0.5) * width * 0.32;
+    const yaw = motion.x * 0.28, pitch = -motion.y * 0.22;
+    const rx = x * Math.cos(yaw) + z * Math.sin(yaw);
+    const rz = -x * Math.sin(yaw) + z * Math.cos(yaw);
+    const ry = y * Math.cos(pitch) - rz * Math.sin(pitch);
+    const depth = y * Math.sin(pitch) + rz * Math.cos(pitch);
+    const perspective = 1 / (1 - depth / Math.max(width * 2, 1));
+    return {
+      x: width / 2 + rx * perspective + motion.x * 12,
+      y: height / 2 + ry * perspective + motion.y * 10,
+      z: base.z,
     };
   }
   function draw(time) {
     ctx.clearRect(0, 0, width, height);
-    pointer += (targetPointer - pointer) * 0.025;
+    for (const key of ["x", "y", "hover"]) {
+      motion[key] += (target[key] - motion[key]) * 0.1;
+    }
     for (let strand = 0; strand < 44; strand++) {
       ctx.beginPath();
       for (let i = 0; i <= 110; i++) {
@@ -54,7 +73,7 @@
         const t = (dot / 8 + strand * 0.021 + time * 0.014) % 1;
         const p = point(t, strand, time);
         const alpha = (0.12 + p.z * 0.55) * Math.sin(t * Math.PI);
-        const radius = 0.45 + p.z * 1.1;
+        const radius = (0.45 + p.z * 1.1) * (1 + motion.hover * 1.15);
         ctx.beginPath();
         ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(226, 229, 207, ${alpha})`;
@@ -79,16 +98,27 @@
   }
   function start() {
     cancelAnimationFrame(frame);
-    if (reduced.matches) draw(0);
+    if (reduced.matches) { resetPointer(); motion.x = motion.y = motion.hover = 0; draw(0); }
     else frame = requestAnimationFrame(animate);
   }
   new ResizeObserver(resize).observe(canvas);
   new IntersectionObserver((entries) => {
     visible = entries[0].isIntersecting;
   }).observe(canvas);
-  document.querySelector(".hero").addEventListener("pointermove", (event) => {
-    targetPointer = event.clientX / innerWidth - 0.5;
+  const hero = document.querySelector(".hero");
+  hero.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch" || reduced.matches) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) { resetPointer(); return; }
+    target.x = x * 2 - 1;
+    target.y = y * 2 - 1;
+    target.hover = 1;
   });
+  hero.addEventListener("pointerleave", resetPointer);
+  hero.addEventListener("pointercancel", resetPointer);
+  window.addEventListener("blur", resetPointer);
   reduced.addEventListener("change", start);
   resize();
   start();
