@@ -13,7 +13,7 @@ services:
       - key: YODAX_STORAGE
         value: postgres
       - key: PUBLIC_ORIGIN
-        value: https://yodax.onrender.com
+        value: https://yodax-99lp.onrender.com
       - key: SESSION_SECRET
         generateValue: true
       - key: DATABASE_URL

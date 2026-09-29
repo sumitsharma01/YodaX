@@ -24,7 +24,7 @@ forecasts, six learning states, one dashboard and the existing research records.
 Use `render.yaml` to create the Free Python service in Frankfurt. Its web-only
 dependency file excludes TimesFM and PyTorch. Configure `DATABASE_URL`,
 `GEMINI_API_KEY`, `SESSION_SECRET` (at least 32 random characters) and
-`PUBLIC_ORIGIN` (the actual HTTPS Render URL). Run one worker.
+`PUBLIC_ORIGIN` (the actual HTTPS Render URL). The current deployment is [`https://yodax-99lp.onrender.com`](https://yodax-99lp.onrender.com). Run one worker.
 
 Research conversations belong to signed, secure, HttpOnly browser sessions.
 A visitor cannot retrieve or append to another session's conversation. Clearing
