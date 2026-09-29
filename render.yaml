@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: yodax
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements-web.txt
+    startCommand: uvicorn backend.app:app --host 0.0.0.0 --port $PORT --workers 1 --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.7
+      - key: YODAX_STORAGE
+        value: postgres
+      - key: PUBLIC_ORIGIN
+        value: https://yodax.onrender.com
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

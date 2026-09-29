@@ -8,6 +8,8 @@ from .fx import cached
 from .research import router as research_router, recover_interrupted
 
 app = FastAPI(title='YodaX', version='0.2.0')
+from .cloud_security import session_middleware
+app.middleware('http')(session_middleware)
 app.include_router(research_router)
 
 @app.on_event('startup')

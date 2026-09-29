@@ -17,6 +17,9 @@ COMPANIES = [
 ]
 
 def connect(path=None):
+    from .storage import Postgres, setting
+    if path is None and setting("YODAX_STORAGE") == "postgres":
+        return Postgres()
     DATA.mkdir(exist_ok=True)
     db = sqlite3.connect(path or DATA / 'yodax.sqlite3', timeout=30)
     db.row_factory = sqlite3.Row

@@ -26,6 +26,12 @@ def refresh():
     response = requests.get(URL, timeout=20)
     response.raise_for_status()
     payload = validate(response.json())
+    from .storage import setting
+    if setting('YODAX_STORAGE') == 'postgres':
+        from .core import connect
+        with connect() as db:
+            db.execute("INSERT INTO settings(key,payload) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET payload=excluded.payload", ('fx',json.dumps(payload)))
+        return payload
     DATA.mkdir(exist_ok=True)
     temporary = DATA / 'fx.json.tmp'
     temporary.write_text(json.dumps(payload))
@@ -34,7 +40,14 @@ def refresh():
 
 def cached():
     try:
-        data = json.loads((DATA / 'fx.json').read_text())
+        from .storage import setting
+        if setting('YODAX_STORAGE') == 'postgres':
+            from .core import connect
+            with connect() as db:
+                row = db.execute("SELECT payload FROM settings WHERE key=?", ('fx',)).fetchone()
+            data = json.loads(row['payload']) if row else {}
+        else:
+            data = json.loads((DATA / 'fx.json').read_text())
         data = validate(dict(data, amount=1))
         data['stale'] = (datetime.now(timezone.utc).date()-date.fromisoformat(data['date'])).days > 7
         if data['stale']:

@@ -1,0 +1,8 @@
+# Web/API dependencies only. TimesFM runs in the separate daily job.
+exchange_calendars==4.13.2
+fastapi==0.141.1
+pandas==3.0.6
+pydantic==2.13.5
+requests==2.34.2
+uvicorn==0.54.0
+psycopg[binary]==3.3.6

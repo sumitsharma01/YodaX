@@ -34,12 +34,17 @@ def key():
 @contextmanager
 def database():
     DATA.mkdir(exist_ok=True)
-    db = sqlite3.connect(DATA / 'research.sqlite3', timeout=30)
-    db.row_factory = sqlite3.Row
+    from .storage import Postgres, setting
+    if setting('YODAX_STORAGE') == 'postgres':
+        db = Postgres()
+    else:
+        db = sqlite3.connect(DATA / 'research.sqlite3', timeout=30)
+        db.row_factory = sqlite3.Row
     db.executescript('''CREATE TABLE IF NOT EXISTS usage(day TEXT PRIMARY KEY, calls INTEGER);
     CREATE TABLE IF NOT EXISTS conversations(id TEXT PRIMARY KEY, topic TEXT, created TEXT);
     CREATE TABLE IF NOT EXISTS turns(id TEXT PRIMARY KEY, conversation TEXT, question TEXT,
-        state TEXT, stage TEXT, result TEXT, error TEXT, created TEXT);''')
+        state TEXT, stage TEXT, result TEXT, error TEXT, created TEXT);
+    CREATE TABLE IF NOT EXISTS conversation_owners(id TEXT PRIMARY KEY, owner TEXT NOT NULL);''')
     try:
         with db:
             yield db
@@ -178,9 +183,25 @@ def generate(prompt, sources, progress=lambda stage: None):
 
 
 def local_only(request):
+    from .storage import setting
     origin = request.headers.get('origin')
-    if request.url.hostname not in ('127.0.0.1', 'localhost') or (origin and origin != str(request.base_url).rstrip('/')):
+    if setting('YODAX_STORAGE') == 'postgres':
+        allowed = setting('PUBLIC_ORIGIN').rstrip('/')
+        if not allowed or str(request.base_url).rstrip('/') != allowed or (origin and origin != allowed):
+            raise HTTPException(403, 'Use the YodaX website to access research.')
+        if not getattr(request.state, 'owner', None):
+            raise HTTPException(403, 'Browser session required.')
+    elif request.url.hostname not in ('127.0.0.1', 'localhost') or (origin and origin != str(request.base_url).rstrip('/')):
         raise HTTPException(403, 'Research is available only from the local demo.')
+
+def authorize(db, conversation_id, request):
+    from .storage import setting
+    if setting('YODAX_STORAGE') != 'postgres':
+        return
+    row = db.execute('SELECT owner FROM conversation_owners WHERE id=?', (conversation_id,)).fetchone()
+    if not row or row['owner'] != request.state.owner:
+        raise HTTPException(404, 'Conversation not found.')
+
 
 
 class ChatInput(BaseModel):
@@ -257,6 +278,7 @@ def status():
 def conversation(conversation_id: str, request: Request):
     local_only(request)
     with database() as db:
+        authorize(db, conversation_id, request)
         chat = db.execute('SELECT * FROM conversations WHERE id=?', (conversation_id,)).fetchone()
         if not chat:
             raise HTTPException(404, 'Conversation not found.')
@@ -269,6 +291,8 @@ def turn(turn_id: str, request: Request):
     local_only(request)
     with database() as db:
         row = db.execute('SELECT * FROM turns WHERE id=?', (turn_id,)).fetchone()
+        if row:
+            authorize(db, row['conversation'], request)
     if not row:
         raise HTTPException(404, 'Message not found.')
     return turn_dict(row)
@@ -288,13 +312,21 @@ def chat(body: ChatInput, request: Request):
     turn_id = uuid.uuid4().hex
     try:
         with database() as db:
+            from .storage import setting
+            if setting('YODAX_STORAGE') == 'postgres':
+                used = db.execute("SELECT count(*) FROM turns t JOIN conversation_owners o ON o.id=t.conversation WHERE o.owner=? AND t.created>=?", (request.state.owner,today())).fetchone()[0]
+                if used >= 10:
+                    raise HTTPException(429, 'This browser has used its daily research allowance.')
             if body.conversation_id:
+                authorize(db, conversation_id, request)
                 row = db.execute('SELECT topic FROM conversations WHERE id=?', (conversation_id,)).fetchone()
                 if not row:
                     raise HTTPException(404, 'Conversation not found. Start a new chat.')
                 topic = row['topic']
             else:
                 db.execute('INSERT INTO conversations VALUES (?,?,?)', (conversation_id, topic, datetime.now(timezone.utc).isoformat()))
+                if setting('YODAX_STORAGE') == 'postgres':
+                    db.execute('INSERT INTO conversation_owners VALUES (?,?)', (conversation_id, request.state.owner))
             db.execute('INSERT INTO turns VALUES (?,?,?,?,?,?,?,?)',
                        (turn_id, conversation_id, message, 'running', 'Starting research…', None, None, datetime.now(timezone.utc).isoformat(),))
     except Exception:
