@@ -37,8 +37,10 @@ cap. Anonymous session limits are not a substitute for authenticated quotas.
 
 Set the GitHub repository Actions secret `DATABASE_URL`. The workflow is enabled
 by default; set repository variable `YODAX_CLOUD_ENABLED=false` to pause it.
-It runs at 22:15 and 23:15 UTC on weekdays, after the US close. The second run
-provides another opportunity after a transient failure; completed sessions are
+It runs at 21:15, 22:15 and 23:15 UTC on weekdays, with a 06:15 UTC fallback
+Tuesday through Saturday. The exchange calendar's one-hour settlement buffer
+determines which close is eligible, including across daylight-saving changes.
+The extra runs provide another opportunity after a delayed or failed run; completed sessions are
 skipped. GitHub scheduling may be delayed. Missing credentials produce an explicit
 failed check rather than silently skipping the job.
 
