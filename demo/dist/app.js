@@ -236,16 +236,25 @@ document.querySelector("#evaluation-scope").onchange = (e) => {
   renderMetrics();
   render();
 };
-async function boot() {
+let refreshing = false;
+async function boot(manual = false) {
+  if (refreshing) return;
+  refreshing = true;
+  const button = document.querySelector('#refresh-forecasts');
+  const status = document.querySelector('#refresh-status');
+  button.disabled = true;
+  button.textContent = 'Refreshing…';
   try {
-    const response = await fetch("/api/dashboard", { cache: "no-store" });
+    const response = await fetch("/api/dashboard", { cache: "no-store", signal: AbortSignal.timeout(60000) });
     if (!response.ok)
       throw new Error(
         "Forecasts unavailable. Start the API and run the local prediction job.",
       );
+    const previous = payload?.generated_at;
+    const symbol = selected?.symbol;
     payload = await response.json();
     stocks = payload.stocks;
-    selected = stocks[0];
+    selected = stocks.find(s => s.symbol === symbol) || stocks[0];
     configureCurrency();
 
     document.querySelector(".demo-badge").textContent =
@@ -261,14 +270,24 @@ async function boot() {
     render();
     renderLearning();
     view(document.body.dataset.view || "overview");
+    status.textContent = manual && previous === payload.generated_at
+      ? `No newer forecasts published. Latest market close: ${payload.cutoff}.`
+      : `Checked ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}. Market close: ${payload.cutoff}.`;
   } catch (error) {
     document.querySelector(".notice").hidden = false;
     document.querySelector(".notice").textContent =
       "Forecasts are temporarily unavailable. Please try again shortly.";
-    document.querySelector(".demo-badge").textContent = "DATA UNAVAILABLE";
-    document.querySelector("#overview").hidden = true;
+    status.textContent = 'Refresh failed. Please try again; previously loaded forecasts remain available.';
+    if (!payload) document.querySelector(".demo-badge").textContent = "DATA UNAVAILABLE";
+  } finally {
+    refreshing = false;
+    button.disabled = false;
+    button.textContent = '↻ Refresh forecasts';
   }
 }
+document.querySelector('#refresh-forecasts').onclick = () => boot(true);
+setInterval(() => { if (!document.hidden) boot(); }, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) boot(); });
 boot();
 
 function renderLearning() {

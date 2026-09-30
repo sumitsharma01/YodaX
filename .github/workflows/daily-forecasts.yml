@@ -2,7 +2,7 @@ name: Daily forecasts
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 22 * * 1-5'
+    - cron: '15 22,23 * * 1-5'
 permissions:
   contents: read
 concurrency:
@@ -10,13 +10,19 @@ concurrency:
   cancel-in-progress: false
 jobs:
   forecast:
-    if: vars.YODAX_CLOUD_ENABLED == 'true'
+    if: vars.YODAX_CLOUD_ENABLED != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
       YODAX_STORAGE: postgres
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
+      - name: Verify database configuration
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo '::error::Set the DATABASE_URL repository Actions secret to the Supabase session-pooler connection URL.'
+            exit 1
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:

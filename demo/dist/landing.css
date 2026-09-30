@@ -889,3 +889,17 @@ footer small {
 @media (prefers-reduced-motion: reduce) {
   .world-stage .continent-pulse { animation: none !important; }
 }
+@media(max-width:700px){
+  .world-stage,.world-heading,.world-inspector{min-width:0;max-width:100%}
+  .world-stage-top{flex-wrap:wrap;gap:8px;padding:14px}
+  .world-map-wrap{aspect-ratio:auto;height:440px;min-height:0}
+  #world-map{width:100%;height:auto;aspect-ratio:1000/540;left:0;top:16px;position:absolute}
+  .world-result{width:calc(100% - 24px);max-width:360px;box-sizing:border-box;padding:22px;top:50%}
+  .world-agent{top:72%}
+  .history-book{bottom:10%;right:8%}
+  .world-controls{gap:8px;padding:12px;align-items:flex-start}
+  .world-chapters{flex-wrap:wrap;gap:4px;min-width:0}
+  .world-controls button{min-height:44px;padding:8px}
+  .world-chapters button span{display:inline;margin-left:4px}
+  .world-inspector p{overflow-wrap:anywhere}
+}

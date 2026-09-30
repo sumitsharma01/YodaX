@@ -35,10 +35,17 @@ cap. Anonymous session limits are not a substitute for authenticated quotas.
 
 ## Daily forecasts
 
-Set the GitHub repository secret `DATABASE_URL`. After validating deployment,
-set repository variable `YODAX_CLOUD_ENABLED=true` to enable the workflow.
-It runs at 22:15 UTC on weekdays, after the US close in both daylight-saving and
-standard time. GitHub scheduling may be delayed.
+Set the GitHub repository Actions secret `DATABASE_URL`. The workflow is enabled
+by default; set repository variable `YODAX_CLOUD_ENABLED=false` to pause it.
+It runs at 22:15 and 23:15 UTC on weekdays, after the US close. The second run
+provides another opportunity after a transient failure; completed sessions are
+skipped. GitHub scheduling may be delayed. Missing credentials produce an explicit
+failed check rather than silently skipping the job.
+
+The workspace checks for newly published data every five minutes while visible
+and on returning to the tab. Refresh forecasts checks immediately, preserving the
+selected stock and chart range. It does not run inference or fetch intraday prices;
+the daily job publishes closing prices, forecasts and evaluations together.
 
 The installed exchange calendar checks the latest completed session and skips
 already processed sessions. A database lock prevents concurrent cloud jobs.
