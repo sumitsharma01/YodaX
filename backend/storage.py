@@ -39,13 +39,28 @@ def translate(sql):
         raise ValueError('Unsupported upsert')
     return sql.replace('?', '%s')
 
+def database_parameters():
+    """Reject incomplete URLs before psycopg can fall back to a local socket."""
+    error = ('DATABASE_URL must be a complete PostgreSQL connection URL with a host, '
+             'database, user and password. Configure the Supabase Session pooler URL '
+             'in this Render service or the GitHub Actions secret.')
+    try:
+        url = urlsplit(setting('DATABASE_URL').strip())
+        if (url.scheme not in ('postgres', 'postgresql') or not url.hostname
+                or not url.username or not url.password or not url.path.strip('/')):
+            raise ValueError
+        return dict(host=url.hostname, port=url.port or 5432,
+                    dbname=unquote(url.path.lstrip('/')), user=unquote(url.username),
+                    password=unquote(url.password))
+    except ValueError:
+        # Never include the supplied URL: it contains credentials.
+        raise RuntimeError(error) from None
+
+
 class Postgres:
     def __init__(self):
         import psycopg
-        url = urlsplit(setting('DATABASE_URL'))
-        self.db = psycopg.connect(host=url.hostname, port=url.port or 5432,
-            dbname=url.path.lstrip('/'), user=unquote(url.username or ''),
-            password=unquote(url.password or ''), sslmode='require',
+        self.db = psycopg.connect(**database_parameters(), sslmode='require',
             connect_timeout=15, row_factory=row_factory, prepare_threshold=None)
         self.db.execute('SET search_path TO yodax')
         self.db.execute('SET extra_float_digits TO 3')

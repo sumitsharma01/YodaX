@@ -33,6 +33,26 @@ conversations have no cloud owner and are not available to public visitors.
 Research has a global 40 model-call daily cap and a 10-message browser-session
 cap. Anonymous session limits are not a substitute for authenticated quotas.
 
+### Updating the live website
+
+Keep one production Render service connected to `sumitsharma01/YodaX`, branch
+`main`: service `srv-dau05d942hec73dbg1pg`, hosting
+`https://yodax-99lp.onrender.com`. Enable Auto-Deploy on commit for that service.
+Pushes to `main` then build and deploy the website; the daily forecast workflow
+updates Supabase independently of website deployments.
+
+The duplicate `yodax-forecasting` service (`srv-dau0blh42hec73dc3cs0`) is not the
+production website. Disable its Auto-Deploy and suspend it in Render to stop
+failed duplicate deployments. These dashboard settings cannot be changed by a
+repository commit.
+
+Render environment variables and GitHub Actions secrets are separate. Both
+need the complete Supabase `DATABASE_URL`. A missing or incomplete URL now fails
+with an explicit configuration error, without printing credentials or falling
+back to a local PostgreSQL socket. Changing the README cannot repair missing
+Render environment variables. Verify `/api/health` and `/api/dashboard` after
+a deployment; a working homepage alone does not establish database health.
+
 ## Daily forecasts
 
 Set the GitHub repository Actions secret `DATABASE_URL`. The workflow is enabled
