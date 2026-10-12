@@ -296,7 +296,7 @@ def run_turn(turn_id, conversation_id, topic, message):
                 except HTTPException:
                     followup_note = 'The initial analysis is ready, but Gemini could not complete the follow-up synthesis. This answer and map reflect the initial evidence only.'
                     sources = sources[:initial_count]
-        result.update(sources=sources, queries=research_queries, date=today(), model=MODEL, note=followup_note)
+        result.update(question=message, sources=sources, queries=research_queries, date=today(), model=MODEL, note=followup_note)
         update_turn(turn_id, state='done', stage='Complete', result=json.dumps(result))
     except HTTPException as exc:
         update_turn(turn_id, state='error', stage='Unable to finish', error=str(exc.detail))

@@ -128,6 +128,9 @@
       const button = el("button", "Explore this answer’s map ↗", article);
       button.type = "button";
       button.onclick = () => selectReport(report, article);
+      const exportButton = el("button", "Generate report ↗", article);
+      exportButton.type = "button";
+      exportButton.onclick = () => window.yodaxReport(report);
       if (report.note) el("p", report.note, article, "fm-footnote");
     } else body.textContent = text;
     messages.scrollTop = messages.scrollHeight;
