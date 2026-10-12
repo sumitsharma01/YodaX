@@ -86,6 +86,21 @@ class ResearchTests(unittest.TestCase):
         with self.assertRaises(HTTPException): research.generate('Question',SOURCES)
         self.assertEqual(post.call_count,2)
 
+    @patch.object(research,'key',return_value='test-secret')
+    @patch.object(research.requests,'post')
+    def test_invalid_report_is_repaired_once(self,post,key):
+        invalid = response()
+        invalid.json.return_value = {'candidates': [{'finishReason': 'MAX_TOKENS'}]}
+        post.side_effect = [invalid, response()]
+        stages = []
+        self.assertEqual(research.generate('Question', SOURCES, stages.append)['answer'], REPORT['answer'])
+        self.assertEqual(post.call_count, 2)
+        self.assertIn('Checking evidence', stages[0])
+        post.reset_mock()
+        post.side_effect = [invalid, invalid]
+        with self.assertRaises(HTTPException): research.generate('Question', SOURCES)
+        self.assertEqual(post.call_count, 2)
+
     def test_restart_recovers_unfinished_turn(self):
         with research.database() as db:
             db.execute('INSERT INTO turns VALUES (?,?,?,?,?,?,?,?)',('t','c','Question','running','Loading',None,None,'2026'))

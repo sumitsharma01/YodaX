@@ -179,6 +179,14 @@ def generate(prompt, sources, progress=lambda stage: None):
             raw = ''.join(p['text'] for p in candidate['content']['parts'] if 'text' in p and not p.get('thought'))
             return validate_result(json.loads(raw), sources)
         except (KeyError, ValueError, IndexError, TypeError):
+            if attempt == 0:
+                progress('Checking evidence links and rebuilding the answer…')
+                body['contents'][0]['parts'].append({'text':
+                    'The previous response did not pass validation. Return a complete JSON report '
+                    'with citations [1] in the answer. Use exactly one outlook node. Every other '
+                    'node must have a directed path to that outlook. Evidence nodes must have '
+                    'valid source_ids from the supplied evidence. Keep the answer and graph concise.'})
+                continue
             raise HTTPException(502, 'The reply contained an incomplete answer or invalid evidence links. Use Retry to request a new answer.') from None
 
 
