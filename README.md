@@ -1,4 +1,5 @@
 # YodaX
+[YodaX](https://yodax-99lp.onrender.com/)
 
 YodaX forecasts the next trading day's closing price for six US stocks, then compares each saved prediction with the actual close. The dashboard keeps the everyday view simple: predicted price, expected change, and results once the market closes.
 
