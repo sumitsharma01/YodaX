@@ -186,8 +186,15 @@ def local_only(request):
     from .storage import setting
     origin = request.headers.get('origin')
     if setting('YODAX_STORAGE') == 'postgres':
-        allowed = setting('PUBLIC_ORIGIN').rstrip('/')
-        if not allowed or str(request.base_url).rstrip('/') != allowed or (origin and origin != allowed):
+        # Render terminates HTTPS before forwarding to the app. Trust only
+        # configured origins, including Render's own service URL, not proxy headers.
+        allowed = {value.rstrip('/') for value in (
+            setting('PUBLIC_ORIGIN'), setting('RENDER_EXTERNAL_URL')) if value}
+        request_host = request.headers.get('host', '').lower()
+        matching = {value for value in allowed
+                    if urlparse(value).scheme == 'https'
+                    and urlparse(value).netloc.lower() == request_host}
+        if not matching or (origin and origin not in matching):
             raise HTTPException(403, 'Use the YodaX website to access research.')
         if not getattr(request.state, 'owner', None):
             raise HTTPException(403, 'Browser session required.')

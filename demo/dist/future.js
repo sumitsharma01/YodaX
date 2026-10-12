@@ -35,7 +35,9 @@
     return node;
   }
   async function api(path, body) {
-    const response = await fetch(
+    let response;
+    try {
+      response = await fetch(
       "/api/research" + path,
       body
         ? {
@@ -45,7 +47,13 @@
           }
         : {},
     );
-    const data = await response.json();
+    } catch {
+      throw new Error("Cannot reach YodaX right now. Check your connection and try again shortly. If your message was accepted, reload to resume it.");
+    }
+    let data;
+    try { data = await response.json(); } catch {
+      throw new Error("The research server is restarting or temporarily unavailable. Please try again shortly.");
+    }
     if (!response.ok)
       throw new Error(
         typeof data.detail === "string"

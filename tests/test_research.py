@@ -113,4 +113,31 @@ class ResearchTests(unittest.TestCase):
         request=Request({'type':'http','scheme':'http','server':('127.0.0.1',5173),'path':'/','headers':[(b'host',b'127.0.0.1:5173'),(b'origin',b'https://evil.example')]})
         with self.assertRaises(HTTPException):research.local_only(request)
 
+    @patch('backend.storage.setting')
+    def test_render_origin_works_behind_http_proxy(self, setting):
+        values = {'YODAX_STORAGE': 'postgres', 'PUBLIC_ORIGIN': 'https://old.example',
+                  'RENDER_EXTERNAL_URL': 'https://yodax.onrender.com'}
+        setting.side_effect = lambda name: values.get(name, '')
+        request = Request({'type': 'http', 'scheme': 'http', 'server': ('internal', 10000),
+                           'path': '/', 'headers': [(b'host', b'yodax.onrender.com'),
+                           (b'origin', b'https://yodax.onrender.com')]})
+        request.state.owner = 'test-owner'
+        research.local_only(request)
+
+    @patch('backend.storage.setting')
+    def test_cloud_origin_rejects_foreign_hosts_origins_and_missing_session(self, setting):
+        setting.side_effect = lambda name: {'YODAX_STORAGE': 'postgres',
+            'PUBLIC_ORIGIN': 'https://yodax.onrender.com'}.get(name, '')
+        for host, origin, owner in [
+            ('evil.example', 'https://yodax.onrender.com', 'owner'),
+            ('yodax.onrender.com', 'https://evil.example', 'owner'),
+            ('yodax.onrender.com', 'null', 'owner'),
+            ('yodax.onrender.com', 'https://yodax.onrender.com', None),
+        ]:
+            with self.subTest(host=host, origin=origin, owner=owner):
+                request = Request({'type': 'http', 'scheme': 'http', 'path': '/',
+                    'headers': [(b'host', host.encode()), (b'origin', origin.encode())]})
+                request.state.owner = owner
+                with self.assertRaises(HTTPException): research.local_only(request)
+
 if __name__=='__main__':unittest.main()
