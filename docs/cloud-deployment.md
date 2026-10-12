@@ -80,3 +80,33 @@ uses SQLite; it has not been changed by this deployment preparation.
 
 Free Render services sleep after inactivity; Supabase free projects can pause
 after low activity. These plans do not provide an always-on guarantee.
+
+## Predictions requested in chat
+
+Explicit stock-price forecast requests can include a US-listed equity ticker and
+1–60 trading sessions. The agent asks for missing ticker/horizon information;
+forex and commodity research does not create numerical stock forecasts. A week
+means five trading sessions and a month means 21, rather than calendar days.
+
+Requests are private to the existing anonymous browser session and appear under
+Tomorrow → Predictions requested in chat. They start as `queued`: Gemini does
+not invent a price. The daily workflow runs `python -m backend.requested_forecasts`
+after its regular job, even if that job fails. The worker handles up to ten new
+requests per run, using the pinned TimesFM 2.5 weights and 256 closing prices.
+The target date is measured from the worker's input cutoff, not the chat time.
+Requests received during a trading session wait for a completed close; issuance
+stops before the next session opens. The free web service does not run inference.
+
+Each issued forecast retains its price, interval, input cutoff, target, issue time,
+USD basis, and model revision. At the target close the worker adds actual price,
+absolute error, direction accuracy, and a volatility-scaled 0–100 score. The score
+is `100 / (1 + squared normalized error)`; normalization uses trailing daily
+volatility times the square root of the horizon. It is not a probability or an
+accuracy percentage. These longer-horizon outcomes do not retrain TimesFM or
+update the separate one-session correction layer.
+
+Unsupported instruments, insufficient history and corporate-action issues are
+shown as errors or review states. Transient fetch/model failures leave requests
+pending for the next run. Original issued values are never overwritten. Report
+exports are snapshots; refresh requested predictions before generating a report
+to include the most recently settled results.

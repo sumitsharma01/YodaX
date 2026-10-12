@@ -198,6 +198,10 @@
               <span class="pill">NEXT TRADING DAY</span>
             </div>
             <div id="tomorrow-cards" class="tomorrow-grid"></div>
+            <h2>Predictions requested in chat</h2>
+            <p class="muted">US-listed stocks · 1–60 trading sessions · Generated after a completed close, then scored at the target close. Prices in USD.</p>
+            <button type="button" id="refresh-requested">Refresh requested predictions</button>
+            <div id="requested-predictions" class="tomorrow-grid" aria-live="polite"></div>
           </section>
           <div class="results-note">
             Results available after market close. We’ll compare each prediction
@@ -522,8 +526,8 @@
       </main>
     </div>
     <script src="app.js?v=11"></script>
-    <script src="research-report.js?v=1"></script>
-    <script src="future.js?v=7"></script>
+    <script src="research-report.js?v=2"></script>
+    <script src="future.js?v=8"></script>
     <script src="methodology.js?v=2"></script>
   </body>
 </html>

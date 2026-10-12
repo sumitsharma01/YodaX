@@ -32,3 +32,6 @@ jobs:
           cache-dependency-path: requirements.lock.txt
       - run: pip install -r requirements.lock.txt
       - run: python -m backend.cloud_daily
+      - name: Issue and score chat-requested predictions
+        if: ${{ !cancelled() }}
+        run: python -m backend.requested_forecasts

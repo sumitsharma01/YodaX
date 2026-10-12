@@ -16,6 +16,7 @@
   }
   let busy = false;
   let currentReport = null;
+  let predictionRows = [];
   let zoom = 1;
   let selectedMessage = null;
   const welcome = $("research-welcome").cloneNode(true);
@@ -128,9 +129,13 @@
       const button = el("button", "Explore this answer’s map ↗", article);
       button.type = "button";
       button.onclick = () => selectReport(report, article);
+      if (report.saved_prediction) {
+        el("p", `Stock forecast queued: ${report.saved_prediction.symbol} · ${report.saved_prediction.horizon_sessions} trading sessions. See Tomorrow → Predictions requested in chat.`, article, "fm-footnote");
+        loadPredictions();
+      }
       const exportButton = el("button", "Generate report ↗", article);
       exportButton.type = "button";
-      exportButton.onclick = () => window.yodaxReport(report);
+      exportButton.onclick = () => window.yodaxReport({...report, tracked_prediction: predictionRows.find(row => row.id === report.saved_prediction?.id)});
       if (report.note) el("p", report.note, article, "fm-footnote");
     } else body.textContent = text;
     messages.scrollTop = messages.scrollHeight;
@@ -523,4 +528,34 @@
       });
     });
   restore();
+
+  async function loadPredictions() {
+    const container = $("requested-predictions");
+    try {
+      const data = await api("/predictions");
+      predictionRows = data.predictions;
+      container.replaceChildren();
+      if (!data.predictions.length) el("p", "Ask the agent for a stock ticker and forecast horizon to save a request.", container);
+      data.predictions.forEach(row => {
+        const card = el("article", "", container, "tomorrow-card");
+        el("h3", `${row.symbol} · ${row.horizon} trading sessions`, card);
+        el("p", `${row.state} · Requested ${row.requested_at.slice(0,10)}`, card);
+        const p = row.payload;
+        if (p.predicted) {
+          el("h3", `$${p.predicted.toFixed(2)} USD`, card);
+          el("p", `Target close: ${p.target} · Issued ${p.issued_at.slice(0,10)}`, card);
+          el("p", `Estimated range: $${p.low.toFixed(2)}–$${p.high.toFixed(2)}`, card);
+        } else if (row.state === "queued") el("p", "Waiting for the scheduled TimesFM worker. No prediction has been issued yet.", card);
+        if (p.evaluation) {
+          el("p", `Actual: $${p.actual.toFixed(2)} · Score: ${p.evaluation.score.toFixed(1)}/100`, card);
+          el("p", `Absolute error: $${p.evaluation.absolute_error.toFixed(2)} · Direction ${p.evaluation.correct ? 'correct' : 'incorrect'}`, card);
+        }
+        if (p.error) el("p", p.error, card);
+      });
+    } catch { container.textContent = "Could not load saved predictions. Use Refresh to try again."; }
+  }
+  $("refresh-requested").onclick = loadPredictions;
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) loadPredictions(); });
+  setInterval(() => { if (!document.hidden) loadPredictions(); }, 300000);
+  loadPredictions();
 })();
