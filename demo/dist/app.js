@@ -160,8 +160,8 @@ function view(name) {
   const titles = {
     future: [
       "Future Market",
-      "Understand what moves commodities.",
-      "A weekly view of supply, demand and the world in between.",
+      "Understand what moves markets.",
+      "Research stocks, forex, commodities and the economy.",
     ],
     tomorrow: [
       "Tomorrow’s forecast",

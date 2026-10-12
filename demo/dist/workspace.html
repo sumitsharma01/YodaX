@@ -330,7 +330,7 @@
                 <span class="eyebrow">RESEARCH AGENT</span>
                 <h3>Context, in a separate lane.</h3>
                 <p>
-                  Gemini analyses commodity headlines and builds an evidence
+                  Gemini analyses market headlines and builds an evidence
                   map. It does not train TimesFM or change these stock
                   forecasts.
                 </p>
@@ -374,12 +374,12 @@
           <div class="fm-toolbar">
             <div>
               <span class="fm-live-dot"></span><strong>YodaX Research</strong
-              ><span class="fm-subtle">Commodity intelligence</span>
+              ><span class="fm-subtle">Market intelligence</span>
             </div>
             <button id="new-research" type="button">＋ New conversation</button>
           </div>
           <div class="fm-workspace">
-            <section class="fm-chat" aria-label="Commodity research chat">
+            <section class="fm-chat" aria-label="Financial research chat">
               <div class="fm-chat-heading">
                 <span>CONVERSATION</span
                 ><span id="research-connection">Connecting…</span>
@@ -395,7 +395,7 @@
                   <div class="fm-avatar">✳</div>
                   <h2>What’s moving your market?</h2>
                   <p>
-                    Ask about a commodity. We’ll connect this week’s headlines,
+                    Ask about commodities, stocks, forex or financial concepts. We’ll connect this week’s headlines,
                     explore the implications, and show the evidence behind the
                     outlook.
                   </p>
@@ -409,17 +409,17 @@
                     </button>
                     <button
                       type="button"
-                      data-topic="Copper"
-                      data-prompt="How could Chinese demand affect copper this week?"
+                      data-topic="Stocks"
+                      data-prompt="What factors could affect Tesla shares this week?"
                     >
-                      Copper · Follow the demand ↗
+                      Stocks · Explore the drivers ↗
                     </button>
                     <button
                       type="button"
-                      data-topic="Iron ore"
-                      data-prompt="What do recent iron ore headlines tell us about supply, trade and risks?"
+                      data-topic="EUR/INR"
+                      data-prompt="What could move the INR per EUR exchange rate over the next month?"
                     >
-                      Iron ore · Connect supply and trade ↗
+                      Forex · Explore EUR/INR ↗
                     </button>
                   </div>
                 </div>
@@ -435,11 +435,11 @@
                   <label for="commodity">Focus</label
                   ><input
                     id="commodity"
-                    value="Crude oil"
+                    value="Financial markets"
                     maxlength="80"
                     required
                     minlength="2"
-                    aria-label="Commodity focus"
+                    aria-label="Market focus"
                   />
                 </div>
                 <label class="sr-only" for="research-question"
@@ -447,7 +447,7 @@
                 >
                 <textarea
                   id="research-question"
-                  placeholder="Ask about supply, trade, demand or a possible scenario…"
+                  placeholder="Ask about stocks, currencies, commodities or financial concepts…"
                   maxlength="2000"
                   required
                   rows="3"
@@ -521,8 +521,8 @@
         </footer>
       </main>
     </div>
-    <script src="app.js?v=10"></script>
-    <script src="future.js?v=5"></script>
+    <script src="app.js?v=11"></script>
+    <script src="future.js?v=6"></script>
     <script src="methodology.js?v=2"></script>
   </body>
 </html>

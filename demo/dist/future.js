@@ -66,7 +66,7 @@
     busy = value;
     $("research-send").disabled = value;
     $("new-research").disabled = value;
-    focus.disabled = value || !!conversationId;
+    focus.disabled = value;
     $("research-send").textContent = value ? "Working…" : "Send ↑";
   }
   function link(source, parent, number) {

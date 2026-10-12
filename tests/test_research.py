@@ -23,6 +23,25 @@ def response(code=200):
 
 
 class ResearchTests(unittest.TestCase):
+    def test_topic_switch_uses_current_question(self):
+        history = [{'user': 'What drives copper?', 'assistant': 'Copper analysis'}]
+        for question in ('predict price of INR against euro', 'What drives Tesla stock?',
+                         'Explain bond yields', 'What affects crude oil?'):
+            query = research.research_query(question, 'Copper', history)
+            self.assertNotIn('copper', query.lower())
+        self.assertIn('INR', research.research_query('predict price of INR against euro', 'Copper', history))
+        self.assertIn('copper', research.research_query('What about its supply?', 'Copper', history).lower())
+
+    def test_educational_answer_does_not_require_invented_sources(self):
+        report = copy.deepcopy(REPORT)
+        report['answer'] = 'Bond prices generally move inversely to yields.'
+        for node in report['nodes']:
+            node['source_ids'] = []
+            if node['kind'] == 'evidence': node['kind'] = 'mechanism'
+        research.validate_result(report, [])
+        report['answer'] += ' [1]'
+        with self.assertRaises(ValueError): research.validate_result(report, [])
+
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
         self.patcher=patch.object(research,'DATA',Path(self.tmp.name));self.patcher.start()
