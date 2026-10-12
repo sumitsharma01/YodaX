@@ -159,8 +159,14 @@ def generate(prompt, sources, progress=lambda stage: None):
         try:
             response = requests.post(f'https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent',
                                      headers={'x-goog-api-key': secret}, json=body, timeout=(10, 70))
+        except (requests.Timeout, requests.ConnectionError):
+            if attempt == 0:
+                progress('Gemini is taking longer than usual. Reconnecting once; your question is saved…')
+                time.sleep(2)
+                continue
+            raise HTTPException(502, 'Gemini did not respond after two attempts. Your question is saved. Please retry in a few minutes.') from None
         except requests.RequestException:
-            raise HTTPException(502, 'Connection to Gemini timed out. Your message is saved; use Retry.') from None
+            raise HTTPException(502, 'The research server could not reach Gemini. Your question is saved. Please retry shortly.') from None
         if response.status_code in (500, 502, 503, 504) and attempt == 0:
             progress('Gemini is busy. Retrying once…')
             time.sleep(2)

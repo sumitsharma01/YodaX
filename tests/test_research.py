@@ -86,6 +86,33 @@ class ResearchTests(unittest.TestCase):
         with self.assertRaises(HTTPException): research.generate('Question',SOURCES)
         self.assertEqual(post.call_count,2)
 
+    @patch.object(research.time,'sleep')
+    @patch.object(research,'key',return_value='test-secret')
+    @patch.object(research.requests,'post')
+    def test_transport_failure_retries_once_then_succeeds(self,post,key,sleep):
+        for failure in (research.requests.Timeout, research.requests.ConnectionError):
+            with self.subTest(failure=failure):
+                post.reset_mock()
+                post.side_effect = [failure('test-secret'), response()]
+                stages = []
+                result = research.generate('Question', SOURCES, stages.append)
+                self.assertEqual(result['answer'], REPORT['answer'])
+                self.assertEqual(post.call_count, 2)
+                self.assertIn('Reconnecting once', stages[0])
+
+    @patch.object(research.time,'sleep')
+    @patch.object(research,'key',return_value='test-secret')
+    @patch.object(research.requests,'post')
+    def test_timeout_stops_after_two_attempts_and_counts_quota(self,post,key,sleep):
+        post.side_effect = research.requests.Timeout('test-secret')
+        with self.assertRaises(HTTPException) as caught:
+            research.generate('Question', SOURCES)
+        self.assertEqual(post.call_count, 2)
+        self.assertNotIn('test-secret', caught.exception.detail)
+        self.assertIn('two attempts', caught.exception.detail)
+        with research.database() as db:
+            self.assertEqual(db.execute('SELECT calls FROM usage WHERE day=?', (research.today(),)).fetchone()[0], 2)
+
     @patch.object(research,'key',return_value='test-secret')
     @patch.object(research.requests,'post')
     def test_invalid_report_is_repaired_once(self,post,key):
