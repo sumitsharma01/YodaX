@@ -13,7 +13,7 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c8f675'/%3E%3Cpath d='M8 8l8 10 8-10M16 18v7' fill='none' stroke='%23131716' stroke-width='4'/%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="workspace-theme.css?v=10" />
+    <link rel="stylesheet" href="workspace-theme.css?v=11" />
   </head>
   <body>
     <aside>
@@ -32,8 +32,8 @@
           ↗ <span>Tomorrow</span></button
         ><button class="nav" aria-label="Track record" data-view="performance">
           ▥ <span>Track record</span></button
-        ><button class="nav" aria-label="Future Market" data-view="future">
-          ◎ <span>Future Market</span></button
+        ><button class="nav" aria-label="AI Chat · Future Market" data-view="future">
+          ◎ <span>AI Chat</span></button
         ><button class="nav" aria-label="Methodology" data-view="methodology">
           ⌘ <span>Methodology</span>
         </button>
@@ -64,6 +64,7 @@
           <button id="refresh-forecasts" type="button">↻ Refresh forecasts</button>
         </div>
       </header>
+      <a class="chat-shortcut" href="/workspace.html?view=future">✳ Open AI chat <span>Future Market research →</span></a>
       <p id="refresh-status" role="status" aria-live="polite">Checks for published forecasts every five minutes. Forecasts use completed market sessions.</p>
       <main>
         <div class="page-heading">
@@ -521,7 +522,7 @@
       </main>
     </div>
     <script src="app.js?v=10"></script>
-    <script src="future.js?v=3"></script>
+    <script src="future.js?v=4"></script>
     <script src="methodology.js?v=2"></script>
   </body>
 </html>

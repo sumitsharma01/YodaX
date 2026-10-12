@@ -6,7 +6,14 @@
   const focus = $("commodity");
   const input = $("research-question");
   const map = $("research-map");
-  let conversationId = localStorage.getItem("yodax-research-conversation");
+  let conversationId = null;
+  try { conversationId = localStorage.getItem("yodax-research-conversation"); } catch {}
+  function rememberConversation(value) {
+    try {
+      if (value) localStorage.setItem("yodax-research-conversation", value);
+      else localStorage.removeItem("yodax-research-conversation");
+    } catch {} // Chat remains usable when browser storage is blocked.
+  }
   let busy = false;
   let currentReport = null;
   let zoom = 1;
@@ -403,7 +410,7 @@
         conversation_id: conversationId || null,
       });
       conversationId = result.conversation_id;
-      localStorage.setItem("yodax-research-conversation", conversationId);
+      rememberConversation(conversationId);
       focus.disabled = true;
       await poll(result.turn_id, text);
     } catch (error) {
@@ -439,7 +446,7 @@
     conversationId = null;
     currentReport = null;
     selectedMessage = null;
-    localStorage.removeItem("yodax-research-conversation");
+    rememberConversation(null);
     messages.replaceChildren(welcome.cloneNode(true));
     attachPrompts();
     focus.disabled = false;
