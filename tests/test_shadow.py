@@ -111,3 +111,8 @@ class ShadowAuthTests(unittest.TestCase):
             self.assertEqual(result.status_code,403)
             result=self.client.post('/api/shadow/login',json={'token':self.token},headers={'Origin':'https://testserver','Host':'attacker.example'})
             self.assertEqual(result.status_code,403)
+
+    def test_pasted_environment_token_trims_line_endings(self):
+        with patch('backend.shadow_api.setting',side_effect=lambda name: (self.token+'\n') if name=='SHADOW_ADMIN_TOKEN' else ''):
+            result=self.client.post('/api/shadow/login',json={'token':self.token})
+            self.assertEqual(result.status_code,200)

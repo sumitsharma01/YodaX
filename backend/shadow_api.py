@@ -16,7 +16,7 @@ COOKIE='yodax_shadow_admin'
 
 
 def key():
-    value=setting('SHADOW_ADMIN_TOKEN')
+    value=setting('SHADOW_ADMIN_TOKEN').strip()
     if len(value)<32:
         raise HTTPException(503,'Private evaluation access is not configured.')
     return value
