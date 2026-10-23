@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import secrets
 import time
+from urllib.parse import urlsplit
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -38,9 +39,17 @@ def authenticated(request):
 
 def origin_check(request):
     origin=request.headers.get('origin')
-    expected=setting('PUBLIC_ORIGIN').rstrip('/') or str(request.base_url).rstrip('/')
-    if origin and origin != expected:
-        raise HTTPException(403,'Origin is not allowed.')
+    if setting('YODAX_STORAGE') == 'postgres':
+        # Render provides the canonical service URL even after service renames.
+        allowed={value.rstrip('/') for value in (setting('PUBLIC_ORIGIN'),setting('RENDER_EXTERNAL_URL')) if value}
+        matching={value for value in allowed if urlsplit(value).scheme=='https'
+                  and urlsplit(value).netloc.lower()==request.headers.get('host','').lower()}
+        if not matching or (origin and origin not in matching):
+            raise HTTPException(403,'Origin is not allowed.')
+    else:
+        expected=setting('PUBLIC_ORIGIN').rstrip('/') or str(request.base_url).rstrip('/')
+        if origin and origin != expected:
+            raise HTTPException(403,'Origin is not allowed.')
 
 
 def response(value,status=200):

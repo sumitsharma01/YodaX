@@ -99,3 +99,15 @@ class ShadowAuthTests(unittest.TestCase):
             result=self.client.get('/api/shadow')
             self.assertEqual(result.status_code,503)
             self.assertNotIn('private connection details',result.text)
+
+    def test_cloud_origin_uses_trusted_render_url_and_secure_cookie(self):
+        values={'SHADOW_ADMIN_TOKEN':self.token,'YODAX_STORAGE':'postgres',
+                'PUBLIC_ORIGIN':'https://old-name.example','RENDER_EXTERNAL_URL':'https://testserver'}
+        with patch('backend.shadow_api.setting',side_effect=lambda name:values.get(name,'')):
+            result=self.client.post('/api/shadow/login',json={'token':self.token},headers={'Origin':'https://testserver'})
+            self.assertEqual(result.status_code,200)
+            self.assertIn('Secure',result.headers['set-cookie'])
+            result=self.client.post('/api/shadow/login',json={'token':self.token},headers={'Origin':'https://attacker.example'})
+            self.assertEqual(result.status_code,403)
+            result=self.client.post('/api/shadow/login',json={'token':self.token},headers={'Origin':'https://testserver','Host':'attacker.example'})
+            self.assertEqual(result.status_code,403)
