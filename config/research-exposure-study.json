@@ -1,0 +1,82 @@
+{
+  "start": "2023-11-01",
+  "horizon": 5,
+  "context": 256,
+  "seed": 42,
+  "stocks": [
+    "AAPL",
+    "FCX"
+  ],
+  "market_context": [
+    "SPY",
+    "CL=F",
+    "BZ=F",
+    "HG=F"
+  ],
+  "coverage_notes": {
+    "oil": "Yahoo front-month WTI/Brent futures proxies; not spot or a roll-adjusted investable return series.",
+    "copper": "Yahoo front-month copper futures proxy; roll effects require review.",
+    "silicon": "Not collected: silicon metal vs polysilicon benchmark and licensed historical source unresolved.",
+    "lithium": "Not collected: grade, region and licensed historical source unresolved.",
+    "steel": "Not collected: regional HRC benchmark and licensed historical source unresolved; NUE is not a steel price substitute."
+  },
+  "validation_windows": [
+    [
+      "2025-09-01",
+      "2026-01-01"
+    ],
+    [
+      "2026-01-01",
+      "2026-07-01"
+    ]
+  ],
+  "holdout_start": "2026-07-01",
+  "event_lag_days": 2,
+  "bootstrap_block_sessions": 20,
+  "bootstrap_repetitions": 1000,
+  "exposure_registry": {
+    "version": "disclosed-country-presence-v1",
+    "method": "Binary country presence from company disclosures. No revenue, production or causal weights are inferred. Historical snapshots are carried forward until superseded or 730 days old.",
+    "snapshots": [
+      {
+        "symbol": "AAPL",
+        "available_at": "2024-11-04T00:00:00Z",
+        "availability_basis": "Conservative date after the November 1, 2024 annual filing; not a timestamp extracted from the SEC feed.",
+        "countries": [
+          "CHN",
+          "IND",
+          "JPN",
+          "KOR",
+          "TWN",
+          "VNM"
+        ],
+        "exposure_type": "outsourced_manufacturing",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+        "source_section": "Risk Factors: outsourcing partners and international trade restrictions",
+        "evidence_summary": "The filing identifies these countries and territories as principal locations for outsourced manufacturing.",
+        "max_age_days": 730,
+        "filing_date": "2024-11-01",
+        "filing_index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/0000320193-24-000123-index.html"
+      },
+      {
+        "symbol": "FCX",
+        "available_at": "2025-03-01T00:00:00Z",
+        "availability_basis": "Conservative date after the 2024 annual filing published in February 2025; not a timestamp extracted from the SEC feed.",
+        "countries": [
+          "USA",
+          "PER",
+          "CHL",
+          "IDN"
+        ],
+        "exposure_type": "mining_operations",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000006/fcx-20241231.htm",
+        "source_section": "Business and Properties: Mining Rights and Overview of Mines",
+        "evidence_summary": "The filing identifies mining operations and host-government exposure in these countries.",
+        "max_age_days": 730,
+        "filing_date": "2025-02-14",
+        "filing_index_url": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000006/0000831259-25-000006-index.htm"
+      }
+    ]
+  },
+  "holdout_note": "July 2026 onward is excluded here but overlaps the earlier exploratory check; it is not an untouched holdout. Prospective evidence is required."
+}

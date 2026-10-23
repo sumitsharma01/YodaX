@@ -1,0 +1,20 @@
+{
+  "start": "2015-01-01",
+  "horizon": 5,
+  "context": 256,
+  "seed": 42,
+  "stocks": ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "JPM", "BAC", "GS", "JNJ", "UNH", "PG", "WMT", "HD", "CAT", "DE", "XOM", "CVX", "FCX", "NUE"],
+  "market_context": ["SPY", "CL=F", "BZ=F", "HG=F"],
+  "coverage_notes": {
+    "oil": "Yahoo front-month WTI/Brent futures proxies; not spot or a roll-adjusted investable return series.",
+    "copper": "Yahoo front-month copper futures proxy; roll effects require review.",
+    "silicon": "Not collected: silicon metal vs polysilicon benchmark and licensed historical source unresolved.",
+    "lithium": "Not collected: grade, region and licensed historical source unresolved.",
+    "steel": "Not collected: regional HRC benchmark and licensed historical source unresolved; NUE is not a steel price substitute."
+  },
+  "validation_windows": [["2022-01-01", "2023-01-01"], ["2023-01-01", "2024-01-01"]],
+  "holdout_start": "2024-01-01",
+  "event_lag_days": 2,
+  "bootstrap_block_sessions": 20,
+  "bootstrap_repetitions": 1000
+}

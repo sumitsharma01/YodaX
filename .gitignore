@@ -7,3 +7,7 @@ data/*
 .env.*
 !.env.example
 .DS_Store
+.venv-research/
+.venv-research-full/
+.ipynb_checkpoints/
+.venv-shadow/

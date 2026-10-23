@@ -1,0 +1,44 @@
+{
+  "version": "disclosed-country-presence-v1",
+  "method": "Binary country presence from company disclosures. No revenue, production or causal weights are inferred. Historical snapshots are carried forward until superseded or 730 days old.",
+  "snapshots": [
+    {
+      "symbol": "AAPL",
+      "available_at": "2024-11-04T00:00:00Z",
+      "availability_basis": "Conservative date after the November 1, 2024 annual filing; not a timestamp extracted from the SEC feed.",
+      "countries": [
+        "CHN",
+        "IND",
+        "JPN",
+        "KOR",
+        "TWN",
+        "VNM"
+      ],
+      "exposure_type": "outsourced_manufacturing",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+      "source_section": "Risk Factors: outsourcing partners and international trade restrictions",
+      "evidence_summary": "The filing identifies these countries and territories as principal locations for outsourced manufacturing.",
+      "max_age_days": 730,
+      "filing_date": "2024-11-01",
+      "filing_index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/0000320193-24-000123-index.html"
+    },
+    {
+      "symbol": "FCX",
+      "available_at": "2025-03-01T00:00:00Z",
+      "availability_basis": "Conservative date after the 2024 annual filing published in February 2025; not a timestamp extracted from the SEC feed.",
+      "countries": [
+        "USA",
+        "PER",
+        "CHL",
+        "IDN"
+      ],
+      "exposure_type": "mining_operations",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000006/fcx-20241231.htm",
+      "source_section": "Business and Properties: Mining Rights and Overview of Mines",
+      "evidence_summary": "The filing identifies mining operations and host-government exposure in these countries.",
+      "max_age_days": 730,
+      "filing_date": "2025-02-14",
+      "filing_index_url": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000006/0000831259-25-000006-index.htm"
+    }
+  ]
+}

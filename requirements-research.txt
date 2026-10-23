@@ -1,0 +1,13 @@
+# Separate environment; production dependency files are unchanged.
+scikit-learn==1.9.1
+joblib==1.6.0
+pyarrow==26.0.0
+nbformat==5.11.1
+nbclient>=0.10,<1
+ipykernel>=6,<8
+matplotlib>=3.10,<4
+pandas>=2.2,<4
+numpy>=2,<3
+yfinance>=1,<2
+exchange-calendars>=4.11,<5
+requests>=2.32,<3

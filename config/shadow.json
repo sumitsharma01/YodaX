@@ -1,0 +1,21 @@
+{
+  "candidate": "country-v2-20261023",
+  "mode": "shadow",
+  "symbols": [
+    "AAPL",
+    "FCX"
+  ],
+  "horizon_sessions": 5,
+  "artifacts": {
+    "market_adjusted": {
+      "path": "models/shadow/country-v2-20261023/market_adjusted",
+      "sha256": "6f146610729b9164cea092a86e18468f11a446f04b598753be59c5ce15528de7"
+    },
+    "event_adjusted": {
+      "path": "models/shadow/country-v2-20261023/event_adjusted",
+      "sha256": "2fa4e397a4240ff689db4f565c76f9c35f412d92bdcecc84966727d11d5c7e9c"
+    }
+  },
+  "issuance_deadline": "Before the next session opens after the cutoff",
+  "note": "Frozen weights from the expanded research study. No public promotion. Exposure age limits remain enforced."
+}

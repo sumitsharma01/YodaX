@@ -46,6 +46,20 @@ TimesFM uses the previous 256 closing prices. The adaptive layer blends its fore
 
 This is a local research application. It has not established a trading advantage, and the learning loop does not guarantee improvement. Yahoo data is intended for personal use; a public deployment needs an appropriately licensed market-data source.
 
+## Research notebook and training pipeline
+
+The [research notebook](notebooks/yodax_research_pipeline.ipynb) covers source collection, data checks, feature engineering, chronological evaluation and saving preprocessing with a nonlinear forecast-adjustment model. The same Python modules run from the command line.
+
+The study is configured for 20 US stocks from January 2015, with available oil/copper context and explicit source gaps for silicon, lithium and steel. The notebook now includes dated, source-backed country links for Apple and Freeport-McMoRan and longer validation across 2025–2026. Results are mixed, with no reliable improvement from country links established, so the research models have **not** replaced live forecasts. The full historical event backfill and prospective validation remain outstanding.
+
+See [research pipeline instructions](docs/research-pipeline.md) for the isolated environment, reproducible commands, dataset coverage and artifact format.
+
+## Private shadow evaluation
+
+The separate five-session worker compares TimesFM, a market-only adjustment, and the frozen country-linked candidate for AAPL and FCX. It saves prospective forecasts and scores them once outcomes settle. Public next-day forecasts remain unchanged. An administrator-only page at `/model-evaluation.html` shows the evidence and run failures. There is no automatic retraining or promotion.
+
+See [shadow deployment and access](docs/shadow-deployment.md) for setup, limitations and rollback.
+
 ## Optional Gemini setup
 
 Copy `.env.example` to `.env` if you do not already have one, then set `GEMINI_API_KEY` using a key from [Google AI Studio](https://aistudio.google.com/api-keys). Keep billing disabled in that Google project. Open **Future Market** in the website to start an investigation.
@@ -72,4 +86,4 @@ node --check demo/dist/landing.js
 node --check demo/dist/methodology.js
 ```
 
-The repository contains source and documentation only. Model weights, market-data snapshots, local databases, and credentials are excluded.
+The repository includes source, documentation and the small frozen shadow adjustment artifacts. TimesFM weights, market-data snapshots, local databases, and credentials are excluded.
