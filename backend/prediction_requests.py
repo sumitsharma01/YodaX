@@ -30,14 +30,15 @@ def validate(value):
     if not isinstance(value, dict):
         raise ValueError('Invalid prediction request')
     symbol, horizon = value.get('symbol'), value.get('horizon_sessions')
-    if not isinstance(symbol, str) or not re.fullmatch(r'[A-Z][A-Z0-9.-]{0,14}', symbol):
+    from .market_context import FUTURES
+    if not isinstance(symbol, str) or (symbol not in FUTURES and not re.fullmatch(r'[A-Z][A-Z0-9.-]{0,14}', symbol)):
         raise ValueError('Invalid stock ticker')
     if type(horizon) is not int or not 1 <= horizon <= 60:
         raise ValueError('Horizon must be 1–60 trading sessions')
     return {'symbol': symbol, 'horizon_sessions': horizon}
 
 
-def enqueue(turn_id, owner, question, request):
+def enqueue(turn_id, owner, question, request, research=None):
     request = validate(request)
     with database() as db:
         schema(db)
@@ -45,9 +46,11 @@ def enqueue(turn_id, owner, question, request):
         if old:
             return dict(old)
         ident = uuid.uuid4().hex
+        payload={'research':research} if research else {}
+        payload['requested_model_route']='event_adjusted' if request['symbol'] in ('AAPL','FCX') and request['horizon_sessions']==5 else 'timesfm_price_only'
         db.execute('INSERT INTO prediction_requests VALUES (?,?,?,?,?,?,?,?,?)',
                    (ident, turn_id, owner, request['symbol'], request['horizon_sessions'], question,
-                    datetime.now(timezone.utc).isoformat(), 'queued', '{}'))
+                    datetime.now(timezone.utc).isoformat(), 'queued', json.dumps(payload,allow_nan=False)))
     return {'id': ident, 'state': 'queued', **request}
 
 

@@ -129,8 +129,22 @@
       const button = el("button", "Explore this answer’s map ↗", article);
       button.type = "button";
       button.onclick = () => selectReport(report, article);
+      if (report.market_context?.saved_forecasts?.length) {
+        const panel = el("section", "", article, "fm-model-evidence");
+        el("h3", "Saved model forecasts", panel);
+        el("p", "Original model outputs—not live quotes. News discussed in this answer does not rewrite these predictions.", panel, "fm-footnote");
+        report.market_context.saved_forecasts.forEach(f => {
+          const p = f.payload || {};
+          const route = f.model_variant || p.model_route || "timesfm";
+          const label = ({event_adjusted:"Event-aware forecast",market_adjusted:"Market-adjusted forecast",timesfm:"TimesFM",timesfm_price_only:"TimesFM price history"})[route] || route;
+          const card = el("div", "", panel, "fm-model-record");
+          el("strong", `${f.symbol} · ${label}${f.experimental ? " · Research beta" : ""}`, card);
+          el("p", `Forecast: ${Number.isFinite(p.predicted) ? p.predicted.toFixed(2) : "—"} ${p.unit || "USD per share"} · target ${f.target || p.target || "—"}`, card);
+          el("p", `Data through ${f.cutoff || p.cutoff || "—"} · ${f.horizon_sessions} sessions · ${f.state}`, card, "fm-footnote");
+        });
+      }
       if (report.saved_prediction) {
-        el("p", `Stock forecast queued: ${report.saved_prediction.symbol} · ${report.saved_prediction.horizon_sessions} trading sessions. See Tomorrow → Predictions requested in chat.`, article, "fm-footnote");
+        el("p", `Forecast request saved: ${report.saved_prediction.symbol} · ${report.saved_prediction.horizon_sessions} trading sessions. See Tomorrow → Predictions requested in chat.`, article, "fm-footnote");
         loadPredictions();
       }
       const exportButton = el("button", "Generate report ↗", article);
@@ -535,7 +549,7 @@
       const data = await api("/predictions");
       predictionRows = data.predictions;
       container.replaceChildren();
-      if (!data.predictions.length) el("p", "Ask the agent for a stock ticker and forecast horizon to save a request.", container);
+      if (!data.predictions.length) el("p", "Ask for a stock, WTI oil or copper price forecast and a horizon to save a request.", container);
       data.predictions.forEach(row => {
         const card = el("article", "", container, "tomorrow-card");
         el("h3", `${row.symbol} · ${row.horizon} trading sessions`, card);
@@ -544,8 +558,10 @@
         if (p.predicted) {
           el("h3", `$${p.predicted.toFixed(2)} USD`, card);
           el("p", `Target close: ${p.target} · Issued ${p.issued_at.slice(0,10)}`, card);
-          el("p", `Estimated range: $${p.low.toFixed(2)}–$${p.high.toFixed(2)}`, card);
-        } else if (row.state === "queued") el("p", "Waiting for the scheduled TimesFM worker. No prediction has been issued yet.", card);
+          if (Number.isFinite(p.low) && Number.isFinite(p.high)) el("p", `Model range: $${p.low.toFixed(2)}–$${p.high.toFixed(2)} (not calibrated)`, card);
+          el("p", `${p.model_route || "TimesFM"}${p.experimental ? " · Research beta" : ""} · ${p.unit || "USD per share"}`, card);
+          if (p.model_input_note) el("p", p.model_input_note, card);
+        } else if (row.state === "queued") el("p", "Waiting for the scheduled forecast worker and validated inputs. No new prediction has been issued yet.", card);
         if (p.evaluation) {
           el("p", `Actual: $${p.actual.toFixed(2)} · Score: ${p.evaluation.score.toFixed(1)}/100`, card);
           el("p", `Absolute error: $${p.evaluation.absolute_error.toFixed(2)} · Direction ${p.evaluation.correct ? 'correct' : 'incorrect'}`, card);

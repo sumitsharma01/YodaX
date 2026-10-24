@@ -1,0 +1,222 @@
+{
+  "audit_date": "2026-10-25",
+  "scope": "Existing two-stock research snapshots; no retraining or live writes",
+  "input_sha256": {
+    "config": "0420c41fbe86ef03dc49b56d2bf5fbf77d6a631ec2188d1d8a2f539d66f84b88",
+    "prices": "2241574169d016e0c991d26a6a295102bf6fcc1f63fddcd0e9e44c2f2bedc83b",
+    "events": "674a1450341324f237e6cf21441dbd05a91c0fc87f269dde38d9d6526482bc8b",
+    "features": "ad3df06a0b8fb2e02fe52170afc9e6fa468062437603f46cc530c51c92058778",
+    "predictions": "0f7b1dd95a346faca0f3715cbd230dac21e0d39b0eec29a53d2c2eac6c34cb9c"
+  },
+  "quality": {
+    "equities": [
+      {
+        "symbol": "AAPL",
+        "rows": 745,
+        "missing_sessions": [],
+        "duplicate_dates": 0,
+        "invalid_close_rows": 0
+      },
+      {
+        "symbol": "FCX",
+        "rows": 745,
+        "missing_sessions": [],
+        "duplicate_dates": 0,
+        "invalid_close_rows": 0
+      }
+    ],
+    "feature_rows": 980,
+    "settled_rows": 970,
+    "feature_missing_fraction": {
+      "baseline_return": 0.0,
+      "return_1": 0.0,
+      "return_5": 0.0,
+      "return_20": 0.0,
+      "volatility_20": 0.0,
+      "volume_ratio": 0.0,
+      "market_return_5": 0.0,
+      "oil_return_5": 0.0020408163265306124,
+      "copper_return_5": 0.0,
+      "event_log_count_7d": 0.12040816326530612,
+      "material_conflict_share_7d": 0.12040816326530612,
+      "material_cooperation_share_7d": 0.12040816326530612,
+      "event_coverage_7d": 0.0,
+      "exposed_event_log_count_7d": 0.15510204081632653,
+      "exposed_conflict_share_7d": 0.15510204081632653,
+      "exposed_sanctions_share_7d": 0.15510204081632653,
+      "exposed_incoming_sanctions_share_7d": 0.15510204081632653,
+      "exposed_cooperation_share_7d": 0.15510204081632653,
+      "exposed_negotiation_halt_share_7d": 0.15510204081632653,
+      "exposure_age_days": 0.07857142857142857
+    },
+    "qualification": "Checks measure coverage/validity, not independent price verification or causality.",
+    "event_archive_days": 641,
+    "missing_archive_days": [
+      "2025-06-14",
+      "2025-06-15",
+      "2025-06-16",
+      "2025-06-17",
+      "2025-06-18",
+      "2025-06-19",
+      "2025-06-20",
+      "2025-06-21",
+      "2025-06-22",
+      "2025-06-23",
+      "2025-06-24",
+      "2025-06-25",
+      "2025-06-26",
+      "2025-06-27",
+      "2025-06-28",
+      "2025-06-29",
+      "2025-06-30",
+      "2025-07-01"
+    ],
+    "full_event_window_rows": 862,
+    "known_exposure_rows": 903,
+    "full_exposure_window_rows": 828,
+    "exposure_sources": {
+      "version": "disclosed-country-presence-v1",
+      "method": "Binary country presence from company disclosures. No revenue, production or causal weights are inferred. Historical snapshots are carried forward until superseded or 730 days old.",
+      "snapshots": [
+        {
+          "symbol": "AAPL",
+          "available_at": "2024-11-04T00:00:00Z",
+          "availability_basis": "Conservative date after the November 1, 2024 annual filing; not a timestamp extracted from the SEC feed.",
+          "countries": [
+            "CHN",
+            "IND",
+            "JPN",
+            "KOR",
+            "TWN",
+            "VNM"
+          ],
+          "exposure_type": "outsourced_manufacturing",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+          "source_section": "Risk Factors: outsourcing partners and international trade restrictions",
+          "evidence_summary": "The filing identifies these countries and territories as principal locations for outsourced manufacturing.",
+          "max_age_days": 730,
+          "filing_date": "2024-11-01",
+          "filing_index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/0000320193-24-000123-index.html"
+        },
+        {
+          "symbol": "FCX",
+          "available_at": "2025-03-01T00:00:00Z",
+          "availability_basis": "Conservative date after the 2024 annual filing published in February 2025; not a timestamp extracted from the SEC feed.",
+          "countries": [
+            "USA",
+            "PER",
+            "CHL",
+            "IDN"
+          ],
+          "exposure_type": "mining_operations",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000006/fcx-20241231.htm",
+          "source_section": "Business and Properties: Mining Rights and Overview of Mines",
+          "evidence_summary": "The filing identifies mining operations and host-government exposure in these countries.",
+          "max_age_days": 730,
+          "filing_date": "2025-02-14",
+          "filing_index_url": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000006/0000831259-25-000006-index.htm"
+        }
+      ]
+    }
+  },
+  "splits": [
+    {
+      "start": "2025-09-01",
+      "end_exclusive": "2026-01-01",
+      "train_rows": 244,
+      "test_rows": 160,
+      "train_dates": 139,
+      "test_dates": 80,
+      "last_training_target": "2025-08-29",
+      "checks": {
+        "training_outcomes_before_test": true,
+        "test_outcomes_before_end": true,
+        "disjoint_asset_dates": true,
+        "no_unsettled_labels": true
+      },
+      "training_rows_by_stock": {
+        "AAPL": 139,
+        "FCX": 105
+      }
+    },
+    {
+      "start": "2026-01-01",
+      "end_exclusive": "2026-07-01",
+      "train_rows": 414,
+      "test_rows": 236,
+      "train_dates": 224,
+      "test_dates": 118,
+      "last_training_target": "2025-12-31",
+      "checks": {
+        "training_outcomes_before_test": true,
+        "test_outcomes_before_end": true,
+        "disjoint_asset_dates": true,
+        "no_unsettled_labels": true
+      },
+      "training_rows_by_stock": {
+        "AAPL": 224,
+        "FCX": 190
+      }
+    }
+  ],
+  "comparison_asset_dates_identical": true,
+  "models": [
+    "event_adjusted",
+    "global_event_adjusted",
+    "market_adjusted",
+    "no_change",
+    "timesfm"
+  ],
+  "prediction_duplicate_keys": 0,
+  "holdout_status": "July 2026 onward is excluded here but overlaps the earlier exploratory check; it is not an untouched holdout. Prospective evidence is required.",
+  "coverage": {
+    "AAPL": {
+      "first": "2023-11-01",
+      "last": "2026-10-21",
+      "rows": 745
+    },
+    "CL=F": {
+      "first": "2023-11-01",
+      "last": "2026-10-20",
+      "rows": 746
+    },
+    "FCX": {
+      "first": "2023-11-01",
+      "last": "2026-10-21",
+      "rows": 745
+    },
+    "HG=F": {
+      "first": "2023-11-01",
+      "last": "2026-10-21",
+      "rows": 748
+    },
+    "SPY": {
+      "first": "2023-11-01",
+      "last": "2026-10-21",
+      "rows": 745
+    }
+  },
+  "exposure_expiry": [
+    {
+      "symbol": "AAPL",
+      "age_limit_date": "2026-11-04"
+    },
+    {
+      "symbol": "FCX",
+      "age_limit_date": "2027-03-01"
+    }
+  ],
+  "frozen_artifacts_match": {
+    "market_adjusted": true,
+    "event_adjusted": true
+  },
+  "limitations": [
+    "The 2015 ambition is not the coverage of this event-aware pilot: event archives start in 2025.",
+    "July 2026 onward was examined previously; it is not an untouched final test set.",
+    "Country presence is a proxy for exposure. Event-to-company relevance and causal effects have not been validated.",
+    "Chronological checks do not establish original source availability: event and disclosure delays are conservative assumptions.",
+    "A fixed two-stock universe has selection bias; no conclusion about all stocks or commodities follows.",
+    "No independent vendor reconciliation, drift clearance, profitability evaluation or calibrated prediction intervals are established.",
+    "Historical comparison results were already inspected. New criteria are prospective, not preregistration of those results."
+  ]
+}

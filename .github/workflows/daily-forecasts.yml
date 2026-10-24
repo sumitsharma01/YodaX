@@ -58,3 +58,6 @@ jobs:
         run: python -m backend.shadow_run --check
       - name: Score and issue prospective shadow forecasts
         run: python -m backend.shadow_run
+      - name: Attach available event-model forecasts to chat requests
+        if: ${{ !cancelled() }}
+        run: python -m backend.requested_forecasts

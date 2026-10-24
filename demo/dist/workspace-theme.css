@@ -621,3 +621,8 @@ body[data-view="future"] .chat-shortcut{display:none}
 .chart-beacon{animation:chart-pulse 2.5s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes chart-pulse{from{transform:scale(.6);opacity:.7}to{transform:scale(2.3);opacity:0}}
 @media(prefers-reduced-motion:reduce){.chart-beacon{animation:none}}
+
+/* Model evidence stays visibly separate from the agent's news interpretation. */
+.fm-model-evidence{margin:20px 0;padding:18px;border:1px solid #d8d1e3;border-radius:14px;background:#f4f0f8;color:#25222b}
+.fm-model-record{padding:12px 0;border-top:1px solid #ded7e8;overflow-wrap:anywhere}
+.fm-model-record p{margin:7px 0}

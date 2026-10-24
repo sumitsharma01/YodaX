@@ -41,7 +41,8 @@
       add('p', `${report.saved_prediction.symbol} · ${report.saved_prediction.horizon_sessions} trading sessions · ${tracked?.state || 'queued'}`, forecast);
       if (p?.predicted) {
         add('h2', `$${p.predicted.toFixed(2)} USD · Target close ${p.target}`, forecast);
-        add('p', `Estimated range $${p.low.toFixed(2)}–$${p.high.toFixed(2)}. Issued ${p.issued_at}. Model ${p.model}, revision ${p.model_revision}.`, forecast);
+        if (Number.isFinite(p.low) && Number.isFinite(p.high)) add('p', `Model range $${p.low.toFixed(2)}–$${p.high.toFixed(2)} (not calibrated).`, forecast);
+        add('p', `Issued ${p.issued_at}. Model ${p.model}, revision ${p.model_revision}. Route: ${p.model_route || 'TimesFM'}. ${p.unit || 'USD per share'}.`, forecast);
         if (p.evaluation) add('p', `Actual close $${p.actual.toFixed(2)} · Score ${p.evaluation.score.toFixed(1)}/100 · Absolute error $${p.evaluation.absolute_error.toFixed(2)}`, forecast);
       } else add('p', 'Awaiting the scheduled model run. No numerical prediction has been issued yet.', forecast);
       add('p', 'This report is a snapshot. Refresh the prediction section and regenerate it for updated results.', forecast);

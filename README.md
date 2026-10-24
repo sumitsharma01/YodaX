@@ -87,3 +87,9 @@ node --check demo/dist/methodology.js
 ```
 
 The repository includes source, documentation and the small frozen shadow adjustment artifacts. TimesFM weights, market-data snapshots, local databases, and credentials are excluded.
+
+## Experiment roadmap
+
+The [dated experiment plan](docs/experiment-plan.md) defines the next milestones and public-model promotion gates. The [October 25 audit](docs/audits/2026-10-25/readiness.md) records measured coverage and split checks; the [executed audit notebook](notebooks/yodax_readiness_audit.ipynb) reproduces them. Research milestones are planned work; only the daily forecast workers are scheduled.
+
+Chat now retrieves saved numerical forecasts and records sourced research alongside typed forecast requests. See [chat forecast routing and coverage](docs/chat-forecast-pipeline.md) for the event-model scope, stock coverage, commodity proxies and remaining research-only markets.
