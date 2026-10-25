@@ -37,7 +37,7 @@ def run(check=False, issue=True, config_path=None):
     from research_pipeline.collect import collect_prices,collect_events
     from research_pipeline.baseline import timesfm_baselines
     from research_pipeline.exposures import enrich_events
-    from research_pipeline.features import build_features
+    from research_pipeline.features import build_features, MARKET_FEATURES
     cfg,models=load_candidate(config_path) if config_path else load_candidate()
     if check:
         print(json.dumps(dict(status='verified',candidate=cfg['candidate'],symbols=cfg['symbols'],horizon_sessions=5)))
@@ -136,10 +136,14 @@ def run(check=False, issue=True, config_path=None):
                         unit=FUTURES.get(row.symbol,{}).get('unit','USD per share'),
                         asset_type='futures_proxy' if row.symbol in FUTURES else 'equity',
                         model_inputs={name:float(getattr(row,name)) if np.isfinite(getattr(row,name)) else None for name in
-                            ['return_5','volatility_20','market_return_5','oil_return_5','copper_return_5','event_log_count_7d','material_conflict_share_7d','material_cooperation_share_7d','event_coverage_7d']},
+                            MARKET_FEATURES+models['event_adjusted'].metadata['event_columns']},
                         event_sources=[f'https://data.gdeltproject.org/events/{day.strftime("%Y%m%d")}.export.CSV.zip' for day in pd.date_range(last-pd.Timedelta(days=6),last)],
                         event_lag_days=lag,
                         model_input_note='Structured global event counts and cooperation/conflict shares, lagged two days; not causal estimates or Gemini headline sentiment.' if not model_config.get('exposure_registry') else 'Structured GDELT events and dated company country exposures.')
+                    from .market_context import model_view
+                    payload=model_view(payload,model)
+                    if model in models and model_config.get('include_symbol'):
+                        payload['model_inputs']['symbol']=row.symbol
                     save_prediction(db,cfg['candidate'],row.symbol,cutoff_text,target_text,model,issued,payload,deadline)
             finish_run(db,run_id,cutoff_text,'partial' if event_problem else 'issued',
                 dict(newly_scored=scored,issued_models=list(outputs),candidate_skip_reason=event_problem,

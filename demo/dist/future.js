@@ -141,6 +141,7 @@
           el("strong", `${f.symbol} · ${label}${f.experimental || p.experimental ? " · Research beta" : ""}`, card);
           el("p", `Forecast: ${Number.isFinite(p.predicted) ? p.predicted.toFixed(2) : "—"} ${p.unit || "USD per share"} · target ${f.target || p.target || "—"}`, card);
           el("p", `Data through ${f.cutoff || p.cutoff || "—"} · ${f.horizon_sessions} sessions · ${f.state}`, card, "fm-footnote");
+          if (route === "no_change") el("p", "Copies the last closing price; no event features are used.", card, "fm-footnote");
           if (p.model_inputs && (route === "event_adjusted" || route === "global_event_adjusted")) {
             const details = el("details", "", card);
             el("summary", "Inputs used by this model", details);

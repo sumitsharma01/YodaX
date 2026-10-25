@@ -254,3 +254,24 @@ class ModelEvidenceTests(unittest.TestCase):
         repair=post.call_args.kwargs['json']['contents'][0]['parts'][-1]['text']
         self.assertIn('If it is empty, omit citations',repair)
         self.assertNotIn('with citations [1]',repair)
+
+    def test_source_links_use_running_render_service_and_repair_saved_reports(self):
+        from backend.market_context import evidence_origin,normalize_report_evidence
+        settings={'PUBLIC_ORIGIN':'https://old.example','RENDER_EXTERNAL_URL':'https://live.example'}
+        report={'sources':[{'kind':'model_output','url':'https://old.example/api/research/model-evidence?candidate=test'},
+                           {'kind':'headline','url':'https://news.example/story'}]}
+        with patch('backend.storage.setting',side_effect=lambda name:settings.get(name,'')):
+            self.assertEqual(evidence_origin(),'https://live.example')
+            normalized=normalize_report_evidence(report)
+        self.assertEqual(normalized['sources'][0]['url'],'https://live.example/api/research/model-evidence?candidate=test')
+        self.assertEqual(normalized['sources'][1]['url'],'https://news.example/story')
+
+    def test_comparison_models_only_expose_features_they_use(self):
+        from backend.market_context import model_view
+        raw={'previous':100.,'predicted':100.,'model_inputs':{'return_5':.01,'event_log_count_7d':12.,'country_conflict_share':.3},'event_sources':['archive']}
+        unchanged=model_view(raw,'no_change')
+        self.assertEqual(unchanged['model_inputs'],{'previous_close':100.})
+        self.assertEqual(unchanged['event_sources'],[])
+        self.assertEqual(model_view(raw,'market_adjusted')['model_inputs'],{'return_5':.01})
+        self.assertEqual(model_view(raw,'event_adjusted')['model_inputs'],raw['model_inputs'])
+        self.assertEqual(raw['event_sources'],['archive'])

@@ -2,7 +2,7 @@
 import json
 import re
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from .core import connect, COMPANIES
 
 FUTURES = {
@@ -77,7 +77,7 @@ def context(message, history, owner):
         for row in rows:
             if row['symbol'] not in symbols or (row['symbol'],row['model']) in seen:continue
             seen.add((row['symbol'],row['model']))
-            p=json.loads(row['payload'])
+            p=model_view(json.loads(row['payload']),row['model'])
             result['saved_forecasts'].append({'symbol':row['symbol'],'horizon_sessions':5,'state':'scored' if row['actual'] is not None else 'pending',
                 'experimental':True,'candidate':row['candidate'],'model_variant':row['model'],'payload':{k:p.get(k) for k in ['previous','predicted','predicted_return','model_revision','feature_version','event_coverage','exposure_coverage','unit','model_inputs','event_sources','event_lag_days','model_input_note']},
                 'cutoff':row['cutoff'],'target':row['target'],'issued_at':row['issued_at'],'actual':row['actual']})
@@ -85,10 +85,44 @@ def context(message, history, owner):
     return result
 
 
+def evidence_origin():
+    from .storage import setting
+    return (setting('RENDER_EXTERNAL_URL') or setting('PUBLIC_ORIGIN') or 'http://127.0.0.1:8000').rstrip('/')
+
+
+def model_view(payload, model):
+    """Separate collected snapshot context from the inputs each comparator uses."""
+    result=dict(payload)
+    if model=='no_change':
+        result['model_inputs']={'previous_close':payload.get('previous')}
+        result['model_input_note']='No-change baseline: copies the cutoff closing price. It does not use event, volatility or other market features.'
+    elif model=='timesfm':
+        result['model_inputs']={'context_sessions':256,'previous_close':payload.get('previous')}
+        result['model_input_note']='TimesFM uses the preceding 256 closing prices. It does not use event features.'
+    elif model=='market_adjusted':
+        result['model_inputs']={k:v for k,v in (payload.get('model_inputs') or {}).items() if k in {'baseline_return','return_1','return_5','return_20','volatility_20','volume_ratio','market_return_5','oil_return_5','copper_return_5','symbol'}}
+        result['model_input_note']='TimesFM plus a market-feature residual model. It does not use event features.'
+    if model!='event_adjusted':
+        result.update(event_sources=[],event_lag_days=None,event_coverage=None,exposure_coverage=None)
+    return result
+
+
+def normalize_report_evidence(report):
+    # Repair links in previously saved conversations without rewriting predictions.
+    for source in report.get('sources',[]):
+        if source.get('kind')=='model_output':
+            url=urlparse(source.get('url',''))
+            if url.path=='/api/research/model-evidence':
+                source['url']=evidence_origin()+url.path+'?'+url.query
+    for record in report.get('market_context',{}).get('saved_forecasts',[]):
+        if record.get('model_variant'):
+            record['payload']=model_view(record['payload'],record['model_variant'])
+    return report
+
+
 def model_sources(market_context):
     """Number saved public model records alongside news without inventing citations."""
-    from .storage import setting
-    origin=(setting('PUBLIC_ORIGIN') or setting('RENDER_EXTERNAL_URL') or 'http://127.0.0.1:8000').rstrip('/')
+    origin=evidence_origin()
     sources=[]
     for record in market_context['saved_forecasts']:
         if not all(record.get(k) for k in ('candidate','symbol','cutoff','model_variant')):
@@ -98,5 +132,5 @@ def model_sources(market_context):
         sources.append(dict(kind='model_output',
             title=f"Saved {record['symbol']} {record['model_variant']} forecast; target {record['target']}",
             url=f'{origin}/api/research/model-evidence?{query}',published=record['issued_at'],publisher='YodaX model ledger',
-            detail=f"Cutoff {record['cutoff']}; predicted {payload.get('predicted')} {payload.get('unit') or 'USD per share'}. Experimental model output, not an observed price or verified economic cause."))
+            detail=f"Cutoff {record['cutoff']}; predicted {payload.get('predicted')} {payload.get('unit') or 'USD per share'}. {payload.get('model_input_note','')} Experimental model output, not an observed price or verified economic cause."))
     return sources
