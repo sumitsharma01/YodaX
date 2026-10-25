@@ -1,40 +1,35 @@
-# Private shadow evaluation
+# Frozen candidate evaluation
 
-The public dashboard still uses its existing next-session forecasts. This experiment runs separately and asks whether a frozen country-linked model improves **five-session** forecasts for Apple (AAPL) and Freeport-McMoRan (FCX).
+Two candidates run separately from the public daily dashboard:
 
-For each stock and cutoff, the worker saves three predictions: TimesFM, TimesFM with a market-only residual adjustment, and TimesFM with the country-linked event adjustment. Comparing all three on the same stock, date and horizon helps distinguish improvement from market features from improvement associated with event features. It does not establish causation.
+| Configuration | Candidate | Scope |
+| --- | --- | --- |
+| `config/shadow.json` | `country-v2-20261023` | AAPL and FCX, dated country exposures, five sessions |
+| `config/shadow-broad.json` | `global-v1-20261025` | 21 stocks, WTI and copper, global event features, five sessions |
 
-## Daily workflow
+The broader candidate saves no-change, TimesFM, market-adjusted and event-adjusted comparisons. It is available to eligible chat requests as a beta. The original experiment remains separate, including requests already pinned to it.
 
-The `shadow` job in Daily forecasts runs after the public job, in a separate environment. It checks candidate checksums and dependency versions, fetches closing prices, scores eligible pending forecasts, and issues new forecasts before the next session opens. Repeating a run cannot overwrite an issued prediction. It never backfills predictions after that deadline.
+## Worker contract
 
-Inputs include daily Yahoo Finance prices, seven complete GDELT daily archives with a two-day availability lag, and dated company exposure disclosures. Missing or expired event inputs cause a recorded candidate skip; they are not interpreted as no events. The market and TimesFM forecasts may still be saved. Such a partial run fails the worker job so the problem remains visible.
+Each run verifies frozen artifacts and dependencies, collects eligible inputs, scores due outcomes and issues prospective predictions. Original issued values are immutable. Late inputs cannot be turned into backdated forecasts. Missing required events cause a recorded failure or skip, not an invented zero or silent model substitution.
 
-Each saved prediction records its cutoff, target, issue timestamp, model revision, artifact and input hashes, and input coverage. The target is five exchange sessions after the cutoff. Scoring waits until one hour after that target session closes. Missing sessions, splits or restated cutoff prices leave the outcome unscored for review. Original predictions remain unchanged.
+Prediction records retain issue time, cutoff, target, revision, artifact/input hashes and features. Scoring checks target availability and corporate actions. Restatements or invalid inputs can leave an outcome unscored for review.
 
-## Access and operation
-
-Install the worker separately:
+Install `requirements-shadow.txt` in a separate environment. Validate locally without writing to cloud storage:
 
 ```sh
-python3.13 -m venv .venv-shadow
-.venv-shadow/bin/pip install -r requirements-shadow.txt
-.venv-shadow/bin/python -m backend.shadow_run --check
-.venv-shadow/bin/python -m backend.shadow_run
+YODAX_STORAGE=sqlite .venv-shadow/bin/python -m backend.shadow_run --check
+YODAX_STORAGE=sqlite .venv-shadow/bin/python -m backend.shadow_run --config config/shadow-broad.json --check
 ```
 
-Use `--score-only` to process outcomes without issuing forecasts. Storage follows `YODAX_STORAGE`: SQLite locally; Postgres with `DATABASE_URL` in the cloud. Never run experimental checks against the production database unintentionally.
+Remove `--check` only when intending to run inference. `--score-only` processes outcomes without issuing forecasts. See [cloud operations](cloud-deployment.md) for scheduled jobs and controls.
 
-On Render, set `SHADOW_ADMIN_TOKEN` to a random secret of at least 32 characters. Open `/model-evaluation.html` and sign in with that token. Access expires after eight hours; rotating the token revokes existing access. This token is separate from research-chat sessions and must never appear in frontend code or Git. The page shows saved forecasts, pending outcomes, error metrics, matched comparisons and run failures. An empty page means no prospective results have been collected yet, not that the model has succeeded.
+## Review and limits
 
-GitHub Actions uses the existing `DATABASE_URL` secret. Set repository variable `YODAX_SHADOW_ENABLED=false` to stop shadow runs without stopping public forecasts. The worker requires no Gemini key. Keeping it in a separate job prevents shadow failures from interrupting public forecast generation, although a shadow failure makes the overall workflow red.
+The private `/model-evaluation.html` page requires `SHADOW_ADMIN_TOKEN`. It shows saved outcomes and worker diagnostics. Public model-evidence links expose selected prediction fields, not administrative logs or private conversation history.
 
-## Frozen candidate and limitations
+Neither candidate retrains or promotes itself. The older Apple disclosure reaches its configured age limit in early November 2026; updating it requires sourced data and a new evaluated candidate, not silently extending the limit.
 
-`config/shadow.json` selects `country-v2-20261023`. Its artifacts contain fitted preprocessing and residual models. They are trusted local artifacts; never load joblib files from untrusted sources. The worker verifies checksums and the TimesFM revision before inference. No automatic retraining or promotion occurs.
+Overlapping five-session targets are dependent observations. Historical and prospective results answer different questions. No-change still wins pooled historical MAE for the broader study. Use [the measured results](global-event-beta.md) and [acceptance plan](experiment-plan.md) when deciding what to change.
 
-This is a two-stock pilot, not a validated model for all equities, commodities or forex. Historical validation was mixed and inconclusive. Five-session targets overlap, so a count of predictions is not a count of independent observations. The page reports descriptive metrics; it does not claim statistical significance or display an invented accuracy score.
-
-The frozen Apple exposure disclosure becomes too old under its 730-day age limit in early November 2026. Refresh the sourced exposure data, evaluate the change, and issue a new version before expecting ongoing event-candidate coverage. Do not silently extend the limit. Future promotion requires prospective evidence, dependent-sample uncertainty estimates, data and drift review, and an explicit decision. A new candidate must use a new version and artifact directory so its results remain distinguishable.
-
-Raw source snapshots are local to each worker run; input hashes survive in the database, but ephemeral Actions workers do not retain those source files. Durable source archiving is a further requirement for full replay audits. The current private evaluation is an early monitoring experiment, not production approval.
+Selected normalized broad inputs are retained as Actions artifacts for 30 days. Full permanent raw-source replay storage remains unfinished.

@@ -1,112 +1,43 @@
-# Cloud deployment
+# Cloud deployment and operations
 
-YodaX targets a free Render web service named `yodax`, Supabase Postgres and a
-daily GitHub Actions job. The public address is subject to Render availability.
+The current public site is [yodax-99lp.onrender.com](https://yodax-99lp.onrender.com). Render serves the website and API, Supabase stores results, and GitHub Actions runs numerical jobs. Free hosting can sleep or pause; it is not an always-on service guarantee.
 
-## Storage and migration
+## Web service and database
 
-Local mode remains the default. Set `YODAX_STORAGE=postgres` and `DATABASE_URL`
-to use cloud storage. Use Supabase's Session pooler (port 5432) for IPv4.
-Connections require TLS. Credentials are read from the environment or local
-ignored `.env`; they never belong in Git or frontend files.
+`render.yaml` describes the web service. It installs `requirements-web.txt` and runs one Uvicorn worker. TimesFM and PyTorch run in separate jobs, keeping numerical inference out of web requests.
 
-Run `python -m backend.migrate_cloud` once against an empty destination. It copies
-both local SQLite databases into a private `yodax` schema and verifies every row
-before committing. Existing destination rows cause the entire migration to abort.
-Local data stays unchanged. The schema is not exposed through Supabase's public
-Data API. Forecast values use double precision and full-precision serialization.
+Set `YODAX_STORAGE=postgres`, a valid `DATABASE_URL`, `PUBLIC_ORIGIN`, `SESSION_SECRET` and `GEMINI_API_KEY` in Render. Use the Supabase session-pooler connection string on port 5432 with TLS. The database URL must contain the remote host, user, database and password. Do not paste an incomplete placeholder or quote it as part of the value. Secrets belong in service settings, never Git.
 
-The initial migration was verified on September 29, 2026: 78 forecasts, 12 adaptive
-forecasts, six learning states, one dashboard and the existing research records.
+The application uses a private `yodax` schema. GitHub Actions needs its own `DATABASE_URL` repository secret; changing Render settings does not update Actions. A local SQLite run also does not update the live website.
 
-## Web service
+`backend.migrate_cloud` is a one-time migration for an empty destination. It verifies copied rows in a transaction and rejects an existing destination. Do not use it as a daily synchronization command. Back up data before any storage migration.
 
-Use `render.yaml` to create the Free Python service in Frankfurt. Its web-only
-dependency file excludes TimesFM and PyTorch. Configure `DATABASE_URL`,
-`GEMINI_API_KEY`, `SESSION_SECRET` (at least 32 random characters) and
-`PUBLIC_ORIGIN` (the actual HTTPS Render URL). The current deployment is [`https://yodax-99lp.onrender.com`](https://yodax-99lp.onrender.com). Run one worker.
+## Daily schedule
 
-Research conversations belong to signed, secure, HttpOnly browser sessions.
-A visitor cannot retrieve or append to another session's conversation. Clearing
-cookies loses access; this beta does not have account recovery. Migrated local
-conversations have no cloud owner and are not available to public visitors.
-Research has a global 40 model-call daily cap and a 10-message browser-session
-cap. Anonymous session limits are not a substitute for authenticated quotas.
+The `Daily forecasts` workflow runs at 21:15, 22:15 and 23:15 UTC on weekdays, with a 06:15 UTC catch-up Tuesday through Saturday. These are UTC times; local time changes with daylight saving. Calendar and cutoff checks decide whether a session needs processing. GitHub scheduling can be delayed.
 
-### Updating the live website
+| Job | Purpose | Disable variable |
+| --- | --- | --- |
+| `forecast` | Public dashboard, outcomes and chat-requested baseline predictions | `YODAX_CLOUD_ENABLED=false` |
+| `shadow` | Original country-linked frozen comparison | `YODAX_SHADOW_ENABLED=false` |
+| `global_events` | Broader 23-asset event candidate and request attachment | `YODAX_GLOBAL_EVENTS_ENABLED=false` |
 
-Keep one production Render service connected to `sumitsharma01/YodaX`, branch
-`main`: service `srv-dau05d942hec73dbg1pg`, hosting
-`https://yodax-99lp.onrender.com`. Enable Auto-Deploy on commit for that service.
-Pushes to `main` then build and deploy the website; the daily forecast workflow
-updates Supabase independently of website deployments.
+The candidate jobs follow the forecast job and use separate environments. They can report failure while the last successful public dashboard remains available. Selected normalized global-event inputs are uploaded with 30-day retention. This is not permanent raw-source storage.
 
-The duplicate `yodax-forecasting` service (`srv-dau0blh42hec73dc3cs0`) is not the
-production website. Disable its Auto-Deploy and suspend it in Render to stop
-failed duplicate deployments. These dashboard settings cannot be changed by a
-repository commit.
+Stopping a worker does not disable its chat route. To stop accepting new requests for that candidate, also change `chat_enabled` in its configuration through a reviewed commit. Existing requests keep their pinned candidate identity.
 
-Render environment variables and GitHub Actions secrets are separate. Both
-need the complete Supabase `DATABASE_URL`. A missing or incomplete URL now fails
-with an explicit configuration error, without printing credentials or falling
-back to a local PostgreSQL socket. Changing the README cannot repair missing
-Render environment variables. Verify `/api/health` and `/api/dashboard` after
-a deployment; a working homepage alone does not establish database health.
+## Deployment and verification
 
-## Daily forecasts
+Render follows the configured `main` branch. A successful Git push is not proof of a successful deployment. Check the Render deploy result, `/api/health`, the dashboard cutoff and the relevant worker status after a release. The frontend periodically checks saved results while visible and on focus; Refresh does not trigger inference or retraining.
 
-Set the GitHub repository Actions secret `DATABASE_URL`. The workflow is enabled
-by default; set repository variable `YODAX_CLOUD_ENABLED=false` to pause it.
-It runs at 21:15, 22:15 and 23:15 UTC on weekdays, with a 06:15 UTC fallback
-Tuesday through Saturday. The exchange calendar's one-hour settlement buffer
-determines which close is eligible, including across daylight-saving changes.
-The extra runs provide another opportunity after a delayed or failed run; completed sessions are
-skipped. GitHub scheduling may be delayed. Missing credentials produce an explicit
-failed check rather than silently skipping the job.
+For private model evaluation, configure `SHADOW_ADMIN_TOKEN` and open `/model-evaluation.html`. Keep the token separate from chat sessions and out of source code.
 
-The workspace checks for newly published data every five minutes while visible
-and on returning to the tab. Refresh forecasts checks immediately, preserving the
-selected stock and chart range. It does not run inference or fetch intraday prices;
-the daily job publishes closing prices, forecasts and evaluations together.
+## When data or chat stops updating
 
-The installed exchange calendar checks the latest completed session and skips
-already processed sessions. A database lock prevents concurrent cloud jobs.
-Predictions, scores and learner state are committed together. The pinned model
-revision and all six next-session forecasts are verified after each run.
+1. Check whether the expected market session has completed and its provider bars are available.
+2. Inspect the Actions run for that session, including all candidate jobs.
+3. Check database availability and the separate Render/Actions credentials.
+4. Inspect recorded input gaps, model checksums or dependency mismatches before retrying a candidate.
+5. For chat failures, distinguish Gemini quota/timeouts from unavailable numerical outputs. Retry research only after the underlying problem clears.
 
-Keep the cloud workflow disabled until the local automation has been retired or
-explicitly separated from cloud operation. The existing local automation still
-uses SQLite; it has not been changed by this deployment preparation.
-
-Free Render services sleep after inactivity; Supabase free projects can pause
-after low activity. These plans do not provide an always-on guarantee.
-
-## Predictions requested in chat
-
-Explicit stock-price forecast requests can include a US-listed equity ticker and
-1–60 trading sessions. The agent asks for missing ticker/horizon information;
-forex and commodity research does not create numerical stock forecasts. A week
-means five trading sessions and a month means 21, rather than calendar days.
-
-Requests are private to the existing anonymous browser session and appear under
-Tomorrow → Predictions requested in chat. They start as `queued`: Gemini does
-not invent a price. The daily workflow runs `python -m backend.requested_forecasts`
-after its regular job, even if that job fails. The worker handles up to ten new
-requests per run, using the pinned TimesFM 2.5 weights and 256 closing prices.
-The target date is measured from the worker's input cutoff, not the chat time.
-Requests received during a trading session wait for a completed close; issuance
-stops before the next session opens. The free web service does not run inference.
-
-Each issued forecast retains its price, interval, input cutoff, target, issue time,
-USD basis, and model revision. At the target close the worker adds actual price,
-absolute error, direction accuracy, and a volatility-scaled 0–100 score. The score
-is `100 / (1 + squared normalized error)`; normalization uses trailing daily
-volatility times the square root of the horizon. It is not a probability or an
-accuracy percentage. These longer-horizon outcomes do not retrain TimesFM or
-update the separate one-session correction layer.
-
-Unsupported instruments, insufficient history and corporate-action issues are
-shown as errors or review states. Transient fetch/model failures leave requests
-pending for the next run. Original issued values are never overwritten. Report
-exports are snapshots; refresh requested predictions before generating a report
-to include the most recently settled results.
+Never fix a stale date by changing timestamps or overwriting a forecast. Preserve the last valid result, record the failure and rerun the appropriate worker. See [system design](system-design.md) for request boundaries and [release guidance](../CONTRIBUTING.md) for version control.
