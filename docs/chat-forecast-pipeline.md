@@ -8,7 +8,7 @@ The chat now receives a server-generated coverage description and saved model ou
 2. Load the browser owner's saved numerical requests and bounded experimental model evidence. Private request histories are never shared across owners. Shadow forecast values are available through chat; administrator logs and controls remain private.
 3. Gemini researches headlines and returns a cited answer, evidence map and optional typed forecast request.
 4. Validate the symbol and 1–60-session horizon on the server. Save the research sources, collection timestamp and query alongside the request.
-5. The separate worker fetches prices directly from the provider. Five-session AAPL/FCX requests attach the current frozen event-adjusted output; missing current event outputs leave the request queued. Other supported requests use TimesFM. There is no silent fallback from the event candidate.
+5. The separate worker fetches prices directly from the provider. Five-session requests in the configured 23-asset beta universe attach the current frozen global-event output; missing current event outputs leave the request queued. Other supported requests use TimesFM. There is no silent fallback from the event candidate.
 6. Save the numerical output, model route and provenance. Score it when its target close becomes available. Follow-up chat can retrieve the saved result; the Predictions requested in chat section also shows it.
 
 ## Coverage
@@ -21,9 +21,9 @@ Brent, silicon, lithium, steel and forex remain available for conversation and s
 
 ## The boundary that matters
 
-Newly researched headlines are **not yet numeric model features**. The chat stores them as research context, and the frozen event model consumes its existing structured GDELT and dated exposure features. Passing arbitrary Gemini-extracted numbers into a model trained on different features would be invalid.
+Newly researched headlines are **not yet numeric model features**. The chat stores them as research context, and the broader frozen event model consumes structured GDELT global event statistics through the same feature builder used in training. The original two-company model separately uses dated country exposure features. Passing arbitrary Gemini-extracted numbers into a model trained on different features would be invalid.
 
-The event-enhanced candidate remains trained only for AAPL and FCX at five sessions. Wider stock and commodity support uses a clearly labelled price-only TimesFM route. Expanding event-based numerical forecasting requires historical feature extraction, source availability checks, retraining and comparative evaluation for those assets. This integration does not claim to have completed that training.
+The broader global-event candidate covers the 20 research stocks, Tesla, WTI and copper at five sessions. The original AAPL/FCX country-linked model remains a separate frozen experiment. Other supported horizons and additional equities use a clearly labelled price-only TimesFM route. See [the beta study](global-event-beta.md) for the actual training coverage, historical errors and limitations. No-change had lower pooled historical error than the broader candidate, so this is experimental coverage, not production approval.
 
 The interface displays saved numerical outputs separately from conversational explanations. It never fabricates an uncertainty interval for the residual model. The TimesFM ranges are uncalibrated model outputs. Research sources and a source-linked graph explain the evidence, not proven causes of a forecast.
 

@@ -1,0 +1,44 @@
+{
+  "candidate": "global-v1-20261025",
+  "mode": "shadow",
+  "chat_enabled": true,
+  "symbols": [
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "NVDA",
+    "META",
+    "JPM",
+    "BAC",
+    "GS",
+    "JNJ",
+    "UNH",
+    "PG",
+    "WMT",
+    "HD",
+    "CAT",
+    "DE",
+    "XOM",
+    "CVX",
+    "FCX",
+    "NUE",
+    "TSLA",
+    "CL=F",
+    "HG=F"
+  ],
+  "horizon_sessions": 5,
+  "artifacts": {
+    "market_adjusted": {
+      "path": "models/shadow/global-v1-20261025/market_adjusted",
+      "sha256": "ef03b87acc61119b84a0b2f114b97e44f914f50c21ef4893596b180517d1e066"
+    },
+    "event_adjusted": {
+      "path": "models/shadow/global-v1-20261025/event_adjusted",
+      "sha256": "f3f931ed6caa36a1f96d852596f8cc5a8540184f3aaeea944d64a0cea41784c6"
+    }
+  },
+  "note": "Global event statistics, not company-specific causation. Experimental chat beta. Historical evaluation is exploratory; no automatic promotion.",
+  "issuance_deadline": "After all input markets close plus one hour; before the next XNYS session opens.",
+  "include_no_change": true
+}

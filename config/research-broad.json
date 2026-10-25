@@ -1,0 +1,63 @@
+{
+  "start": "2023-01-01",
+  "horizon": 5,
+  "context": 256,
+  "seed": 42,
+  "stocks": [
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "NVDA",
+    "META",
+    "JPM",
+    "BAC",
+    "GS",
+    "JNJ",
+    "UNH",
+    "PG",
+    "WMT",
+    "HD",
+    "CAT",
+    "DE",
+    "XOM",
+    "CVX",
+    "FCX",
+    "NUE",
+    "TSLA",
+    "CL=F",
+    "HG=F"
+  ],
+  "market_context": [
+    "SPY",
+    "CL=F",
+    "BZ=F",
+    "HG=F"
+  ],
+  "coverage_notes": {
+    "oil": "Yahoo front-month WTI/Brent futures proxies; not spot or a roll-adjusted investable return series.",
+    "copper": "Yahoo front-month copper futures proxy; roll effects require review.",
+    "silicon": "Not collected: silicon metal vs polysilicon benchmark and licensed historical source unresolved.",
+    "lithium": "Not collected: grade, region and licensed historical source unresolved.",
+    "steel": "Not collected: regional HRC benchmark and licensed historical source unresolved; NUE is not a steel price substitute."
+  },
+  "validation_windows": [
+    [
+      "2025-09-01",
+      "2026-01-01"
+    ],
+    [
+      "2026-01-01",
+      "2026-07-01"
+    ]
+  ],
+  "holdout_start": "2026-07-01",
+  "event_lag_days": 2,
+  "bootstrap_block_sessions": 20,
+  "bootstrap_repetitions": 1000,
+  "include_symbol": true,
+  "baseline_start": "2025-01-01",
+  "baseline_end": "2026-07-01",
+  "study_note": "Exploratory wider-universe study. Evaluation dates overlap earlier two-stock studies. No pristine holdout claim. Futures use XNYS sampling; not physical demand or investment returns.",
+  "completed_futures_context": true
+}

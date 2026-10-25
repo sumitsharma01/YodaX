@@ -9,17 +9,21 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import HistGradientBoostingRegressor
 from .features import MARKET_FEATURES, EVENT_FEATURES, FEATURE_VERSION, build_features, model_event_features
 from .collect import write_json
 
 
-def make_pipeline(include_events=True, seed=42, event_columns=None):
+def make_pipeline(include_events=True, seed=42, event_columns=None, include_symbol=False):
     columns = MARKET_FEATURES + ((event_columns if event_columns is not None else EVENT_FEATURES) if include_events else [])
+    transforms = [('numeric', SimpleImputer(strategy='median', add_indicator=True,
+            keep_empty_features=True), columns)]
+    if include_symbol:
+        transforms.append(('asset', OneHotEncoder(handle_unknown='error', sparse_output=False), ['symbol']))
     return Pipeline([
-        ('select', ColumnTransformer([('numeric', SimpleImputer(strategy='median', add_indicator=True,
-            keep_empty_features=True), columns)], remainder='drop')),
+        ('select', ColumnTransformer(transforms, remainder='drop')),
         ('model', HistGradientBoostingRegressor(max_iter=100, max_leaf_nodes=7,
             min_samples_leaf=30, learning_rate=0.05, l2_regularization=10,
             early_stopping=False, random_state=seed))])
@@ -32,6 +36,8 @@ class ForecastBundle:
     metadata: dict
 
     def predict_features(self, features):
+        if self.config.get('include_symbol') and not set(features.symbol).issubset(self.config['stocks']):
+            raise ValueError('Asset outside the trained model universe')
         required = MARKET_FEATURES + (self.metadata.get('event_columns', EVENT_FEATURES) if self.metadata['include_events'] else [])
         missing = set(required) - set(features)
         if missing:
@@ -73,7 +79,9 @@ def fit_bundle(features, config, include_events, baseline_revisions, data_kind='
     if include_events and config.get('exposure_registry'):
         if not features.exposure_known.eq(1).all() or not features.exposure_coverage_7d.eq(1).all():
             raise ValueError('Training requires available exposure snapshots and complete archives')
-    pipe = make_pipeline(include_events, config.get('seed', 42), event_columns)
+    if config.get('include_symbol') and set(features.symbol) != set(config['stocks']):
+        raise ValueError('Training must contain every configured asset')
+    pipe = make_pipeline(include_events, config.get('seed', 42), event_columns, config.get('include_symbol', False))
     pipe.fit(features, features.target_return - features.baseline_return)
     metadata = dict(feature_version=FEATURE_VERSION, include_events=include_events, event_columns=event_columns,
         baseline_revisions=list(baseline_revisions), data_kind=data_kind,

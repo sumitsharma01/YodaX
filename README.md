@@ -93,3 +93,7 @@ The repository includes source, documentation and the small frozen shadow adjust
 The [dated experiment plan](docs/experiment-plan.md) defines the next milestones and public-model promotion gates. The [October 25 audit](docs/audits/2026-10-25/readiness.md) records measured coverage and split checks; the [executed audit notebook](notebooks/yodax_readiness_audit.ipynb) reproduces them. Research milestones are planned work; only the daily forecast workers are scheduled.
 
 Chat now retrieves saved numerical forecasts and records sourced research alongside typed forecast requests. See [chat forecast routing and coverage](docs/chat-forecast-pipeline.md) for the event-model scope, stock coverage, commodity proxies and remaining research-only markets.
+
+### Global-event chat beta
+
+Five-session chat forecasts now cover 21 US stocks plus WTI and copper price proxies using a frozen model that combines historical prices with structured GDELT event statistics. This is experimental: the simple no-change baseline still wins on average error in both historical comparisons. [Study, results and limitations](docs/global-event-beta.md) · [Executed notebook](notebooks/yodax_multi_asset_events.ipynb). Other supported horizons use TimesFM; newly discussed headlines do not directly alter numerical predictions.

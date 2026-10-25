@@ -1,0 +1,205 @@
+{
+  "equities": [
+    {
+      "symbol": "AAPL",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "MSFT",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "GOOGL",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "AMZN",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "NVDA",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "META",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "JPM",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "BAC",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "GS",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "JNJ",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "UNH",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "PG",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "WMT",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "HD",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "CAT",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "DE",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "XOM",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "CVX",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "FCX",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "NUE",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "TSLA",
+      "rows": 875,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "CL=F",
+      "rows": 877,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    },
+    {
+      "symbol": "HG=F",
+      "rows": 878,
+      "missing_sessions": [],
+      "duplicate_dates": 0,
+      "invalid_close_rows": 0
+    }
+  ],
+  "feature_rows": 8424,
+  "settled_rows": 8309,
+  "feature_missing_fraction": {
+    "baseline_return": 0.0,
+    "return_1": 0.0,
+    "return_5": 0.0,
+    "return_20": 0.0,
+    "volatility_20": 0.0,
+    "volume_ratio": 0.0,
+    "market_return_5": 0.0,
+    "oil_return_5": 0.0,
+    "copper_return_5": 0.0,
+    "event_log_count_7d": 0.053418803418803416,
+    "material_conflict_share_7d": 0.053418803418803416,
+    "material_cooperation_share_7d": 0.053418803418803416,
+    "event_coverage_7d": 0.0
+  },
+  "qualification": "Checks measure coverage/validity, not independent price verification or causality.",
+  "event_archive_days": 641,
+  "missing_archive_days": [
+    "2025-06-14",
+    "2025-06-15",
+    "2025-06-16",
+    "2025-06-17",
+    "2025-06-18",
+    "2025-06-19",
+    "2025-06-20",
+    "2025-06-21",
+    "2025-06-22",
+    "2025-06-23",
+    "2025-06-24",
+    "2025-06-25",
+    "2025-06-26",
+    "2025-06-27",
+    "2025-06-28",
+    "2025-06-29",
+    "2025-06-30",
+    "2025-07-01"
+  ],
+  "full_event_window_rows": 7974
+}

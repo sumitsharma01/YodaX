@@ -136,11 +136,27 @@
         report.market_context.saved_forecasts.forEach(f => {
           const p = f.payload || {};
           const route = f.model_variant || p.model_route || "timesfm";
-          const label = ({event_adjusted:"Event-aware forecast",market_adjusted:"Market-adjusted forecast",timesfm:"TimesFM",timesfm_price_only:"TimesFM price history"})[route] || route;
+          const label = ({no_change:"No-change baseline",event_adjusted:"Event-aware forecast",global_event_adjusted:"Global-event forecast",market_adjusted:"Market-adjusted forecast",timesfm:"TimesFM",timesfm_price_only:"TimesFM price history"})[route] || route;
           const card = el("div", "", panel, "fm-model-record");
-          el("strong", `${f.symbol} · ${label}${f.experimental ? " · Research beta" : ""}`, card);
+          el("strong", `${f.symbol} · ${label}${f.experimental || p.experimental ? " · Research beta" : ""}`, card);
           el("p", `Forecast: ${Number.isFinite(p.predicted) ? p.predicted.toFixed(2) : "—"} ${p.unit || "USD per share"} · target ${f.target || p.target || "—"}`, card);
           el("p", `Data through ${f.cutoff || p.cutoff || "—"} · ${f.horizon_sessions} sessions · ${f.state}`, card, "fm-footnote");
+          if (p.model_inputs && (route === "event_adjusted" || route === "global_event_adjusted")) {
+            const details = el("details", "", card);
+            el("summary", "Inputs used by this model", details);
+            el("p", p.model_input_note || "Historical prices and structured global event statistics.", details);
+            const fields = {return_5:"Five-session price return",volatility_20:"20-session return volatility",material_conflict_share_7d:"Material-conflict share of event records",material_cooperation_share_7d:"Material-cooperation share of event records",event_coverage_7d:"Archive coverage"};
+            Object.entries(fields).forEach(([key, label]) => {
+              const value = p.model_inputs[key];
+              el("p", `${label}: ${Number.isFinite(value) ? (value * 100).toFixed(2) + "%" : "Unavailable"}`, details, "fm-footnote");
+            });
+            el("p", `Event availability lag: ${p.event_lag_days ?? "—"} days. These are statistical associations, not proven causes.`, details, "fm-footnote");
+            (p.event_sources || []).forEach((url, i) => {
+              if (!/^https:\/\/data\.gdeltproject\.org\/events\/\d{8}\.export\.CSV\.zip$/.test(url)) return;
+              const link = el("a", `Event archive ${i + 1} ↗`, details);
+              link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer";
+            });
+          }
         });
       }
       if (report.saved_prediction) {

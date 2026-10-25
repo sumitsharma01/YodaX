@@ -53,7 +53,7 @@ class MarketContextTests(unittest.TestCase):
                 with connect(path) as db:
                     schema(db)
                     p={'predicted':105.,'previous':100.,'model_revision':MODEL_REVISION}
-                    db.execute('INSERT INTO shadow_predictions VALUES (?,?,?,?,?,?,?,NULL,NULL,NULL,NULL)',('frozen','AAPL','2026-10-12','2026-10-19','event_adjusted','2026-10-12T21:15:00Z',json.dumps(p)))
+                    db.execute('INSERT INTO shadow_predictions VALUES (?,?,?,?,?,?,?,NULL,NULL,NULL,NULL)',(listing('alice')[0]['payload'].get('requested_candidate') or 'frozen','AAPL','2026-10-12','2026-10-19','event_adjusted','2026-10-12T21:15:00Z',json.dumps(p)))
                 worker.run()
                 row=listing('alice')[0]
                 self.assertEqual(row['state'],'predicted')
@@ -61,4 +61,18 @@ class MarketContextTests(unittest.TestCase):
                 self.assertIsNone(row['payload']['low'])
                 self.assertEqual(row['payload']['research']['sources'],['news evidence'])
                 self.assertFalse(row['payload']['research_used_as_model_features'])
-                self.assertEqual(row['payload']['model_route'],'event_adjusted')
+                self.assertEqual(row['payload']['model_route'],row['payload']['requested_model_route'])
+
+    def test_broad_event_requests_pin_candidate_and_horizon(self):
+        from backend.market_context import event_route
+        route=event_route('HG=F',5)
+        self.assertEqual(route['route'],'global_event_adjusted')
+        self.assertIsNone(event_route('HG=F',21))
+        self.assertIsNone(event_route('IBM',5))
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'db.sqlite3'
+            with patch('backend.prediction_requests.connect',side_effect=lambda:connect(path)):
+                enqueue('copper','alice','Copper price next week',{'symbol':'HG=F','horizon_sessions':5})
+                payload=listing('alice')[0]['payload']
+                self.assertEqual(payload['requested_candidate'],route['candidate'])
+                self.assertEqual(payload['requested_model_route'],'global_event_adjusted')

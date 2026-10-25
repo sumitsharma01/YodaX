@@ -98,23 +98,35 @@ def run():
                     raise ValueError('Price history has missing trading sessions.')
                 if (frame['Stock Splits'].iloc[-256:] != 0).any():
                     raise ValueError('Recent stock split requires a price-history review.')
-                if payload.get('requested_model_route')=='event_adjusted':
+                if payload.get('requested_model_route') in ('event_adjusted','global_event_adjusted'):
                     with database() as db:
-                        saved=db.execute("SELECT candidate,payload,target,issued_at FROM shadow_predictions WHERE symbol=? AND cutoff=? AND model='event_adjusted' ORDER BY issued_at DESC LIMIT 1",(row['symbol'],str(cutoff.date()))).fetchone()
+                        query="SELECT candidate,payload,target,issued_at FROM shadow_predictions WHERE symbol=? AND cutoff=? AND model='event_adjusted'"
+                        params=[row['symbol'],str(cutoff.date())]
+                        candidate=payload.get('requested_candidate')
+                        if not candidate and payload['requested_model_route']=='event_adjusted':
+                            from .core import ROOT
+                            candidate=json.loads((ROOT/'config/shadow.json').read_text())['candidate']
+                        if not candidate:
+                            raise ValueError('Event request is missing its frozen candidate identity.')
+                        query+=' AND candidate=?';params.append(candidate)
+                        saved=db.execute(query+' ORDER BY issued_at DESC LIMIT 1',params).fetchone()
                     if not saved:
                         print(row['symbol'],'awaiting current event model inputs',flush=True)
                         continue
                     event=json.loads(saved['payload'])
+                    if saved['target']!=str(target_session(cal,cutoff,row['horizon']).date()):
+                        raise ValueError('Saved model horizon does not match the requested target.')
                     if abs(float(closes[-1])/event['previous']-1)>.001:
                         raise ValueError('Shadow cutoff price differs from current provider history; review required.')
                     payload.update(predicted=event['predicted'],previous=event['previous'],low=None,high=None,
                         cutoff=str(cutoff.date()),target=saved['target'],issued_at=saved['issued_at'],
-                        model='TimesFM + country-linked residual model',model_revision=event['model_revision'],
-                        model_route='event_adjusted',candidate=saved['candidate'],experimental=True,
+                        model=payload.get('requested_model_name','TimesFM + country-linked residual model'),model_revision=event['model_revision'],
+                        model_route=payload['requested_model_route'],candidate=saved['candidate'],experimental=True,
                         research_used_as_model_features=False,
-                        model_input_note='Structured GDELT archives and dated country exposures; conversational headlines are separate evidence.',
+                        model_input_note=event.get('model_input_note','Structured GDELT archives and dated country exposures; conversational headlines are separate evidence.'),
+                        model_inputs=event.get('model_inputs'),event_sources=event.get('event_sources'),event_lag_days=event.get('event_lag_days'),
                         model_input_provenance={k:event.get(k) for k in ['artifact_sha','prices_sha','events_sha','feature_version','event_coverage','exposure_coverage']},
-                        currency='USD',unit='USD per share',scale=scale_from_history(closes.tolist())*math.sqrt(row['horizon']))
+                        currency='USD',unit=asset['unit'] if asset else 'USD per share',asset_type='futures_proxy' if asset else 'equity',scale=scale_from_history(closes.tolist())*math.sqrt(row['horizon']))
                     with database() as db:
                         db.execute("UPDATE prediction_requests SET state='predicted',payload=? WHERE id=? AND state='queued'",(json.dumps(payload,allow_nan=False),row['id']))
                     issued+=1

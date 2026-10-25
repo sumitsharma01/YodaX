@@ -47,7 +47,12 @@ def enqueue(turn_id, owner, question, request, research=None):
             return dict(old)
         ident = uuid.uuid4().hex
         payload={'research':research} if research else {}
-        payload['requested_model_route']='event_adjusted' if request['symbol'] in ('AAPL','FCX') and request['horizon_sessions']==5 else 'timesfm_price_only'
+        from .market_context import event_route
+        route=event_route(request['symbol'],request['horizon_sessions'])
+        payload['requested_model_route']=route['route'] if route else 'timesfm_price_only'
+        if route:
+            payload['requested_candidate']=route['candidate']
+            payload['requested_model_name']=route['name']
         db.execute('INSERT INTO prediction_requests VALUES (?,?,?,?,?,?,?,?,?)',
                    (ident, turn_id, owner, request['symbol'], request['horizon_sessions'], question,
                     datetime.now(timezone.utc).isoformat(), 'queued', json.dumps(payload,allow_nan=False)))

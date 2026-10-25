@@ -130,3 +130,28 @@ class PipelineTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class BroadContractTests(unittest.TestCase):
+    def test_futures_context_is_not_available_at_equity_close(self):
+        import exchange_calendars as xc
+        prices,events,baselines=synthetic_inputs()
+        config=json.loads(Path('config/research.json').read_text())
+        config.update(stocks=['AAPL','FCX'],completed_futures_context=True)
+        features=build_features(prices,events,baselines,config)
+        row=features.iloc[-1]
+        for name in ['XNYS','NYMEX','COMEX']:
+            self.assertGreaterEqual(row.cutoff_at,xc.get_calendar(name).session_close(row.date)+pd.Timedelta(hours=1))
+
+    def test_asset_encoder_rejects_untrained_assets_and_missing_training_asset(self):
+        from research_pipeline.model import fit_bundle
+        prices,events,baselines=synthetic_inputs()
+        config=json.loads(Path('config/research.json').read_text())
+        config.update(stocks=['AAPL','FCX'],include_symbol=True)
+        features=build_features(prices,events,baselines,config)
+        train=features[features.event_coverage_7d.eq(1)].dropna(subset=['target_return'])
+        model=fit_bundle(train,config,True,['fixture'],'synthetic_verification_only')
+        changed=train.tail(1).copy();changed['symbol']='UNKNOWN'
+        with self.assertRaisesRegex(ValueError,'outside'):
+            model.predict_features(changed)
+        with self.assertRaisesRegex(ValueError,'every configured asset'):
+            fit_bundle(train[train.symbol.eq('AAPL')],config,True,['fixture'])

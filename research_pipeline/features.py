@@ -86,7 +86,13 @@ def build_features(prices, events, baselines, config):
         future_splits = pd.concat([frame.split.shift(-i).ne(0) for i in range(1, horizon + 1)], axis=1).any(axis=1)
         future_missing = pd.concat([close.shift(-i).isna() for i in range(1, horizon + 1)], axis=1).any(axis=1)
         f.loc[(future_splits | future_missing).to_numpy(), 'target_return'] = np.nan
-        f['cutoff_at'] = [cal.session_close(d) + pd.Timedelta(hours=1) for d in dates]
+        clocks=[cal]
+        if config.get('completed_futures_context'):
+            # WTI/copper daily candles may finish after equities. Historical replay
+            # and live issuance must both wait for the latest input market close.
+            clocks += [xcals.get_calendar(name, start=dates.min()-pd.Timedelta(days=30),
+                         end=dates.max()+pd.Timedelta(days=30)) for name in ['NYMEX','COMEX']]
+        f['cutoff_at'] = [max(clock.session_close(d) for clock in clocks) + pd.Timedelta(hours=1) for d in dates]
         frames.append(f.loc[valid.to_numpy()])
     if not frames:
         raise ValueError('No equity windows available')

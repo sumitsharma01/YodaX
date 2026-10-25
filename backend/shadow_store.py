@@ -42,7 +42,7 @@ def save_prediction(db, candidate, symbol, cutoff, target, model, issued_at, pay
         (candidate,symbol,cutoff,target,model,issued_at,json.dumps(payload,allow_nan=False)))
 
 
-def score_pending(db, prices, now=None):
+def score_pending(db, prices, now=None, candidate=None):
     """Only assign outcomes; immutable predicted values stay in the original payload."""
     import math
     import pandas as pd
@@ -51,9 +51,16 @@ def score_pending(db, prices, now=None):
     cal = xcals.get_calendar('XNYS')
     count = 0
     for saved in db.execute('SELECT * FROM shadow_predictions WHERE actual IS NULL').fetchall():
+        if candidate is not None and saved['candidate'] != candidate:
+            continue
         target = pd.Timestamp(saved['target'])
         if cal.session_close(target) + pd.Timedelta(hours=1) > now:
             continue
+        from .market_context import FUTURES
+        if saved['symbol'] in FUTURES:
+            future_cal=xcals.get_calendar(FUTURES[saved['symbol']]['close_calendar'])
+            if not future_cal.is_session(target) or future_cal.session_close(target)+pd.Timedelta(hours=1)>now:
+                continue
         frame = prices[prices.symbol.eq(saved['symbol'])].set_index('date').sort_index()
         cutoff = pd.Timestamp(saved['cutoff'])
         if cutoff not in frame.index or target not in frame.index:
@@ -121,6 +128,10 @@ def summary(db):
             comparisons.append(dict(candidate=candidate,matched_forecasts=len(matches),dates=len({key[2] for key,_ in matches}),
                 improvement_vs_timesfm_pp=sum(v['timesfm']['absolute_error_pp']-v['event_adjusted']['absolute_error_pp'] for _,v in matches)/len(matches),
                 improvement_vs_market_pp=sum(v['market_adjusted']['absolute_error_pp']-v['event_adjusted']['absolute_error_pp'] for _,v in matches)/len(matches)))
+            with_no_change=[v for _,v in matches if 'no_change' in v]
+            if with_no_change:
+                comparisons[-1]['matched_no_change_forecasts']=len(with_no_change)
+                comparisons[-1]['improvement_vs_no_change_pp']=sum(v['no_change']['absolute_error_pp']-v['event_adjusted']['absolute_error_pp'] for v in with_no_change)/len(with_no_change)
     runs=[]
     for row in db.execute('SELECT * FROM shadow_runs ORDER BY started_at DESC LIMIT 50').fetchall():
         value=dict(row);value['detail']=json.loads(value['detail']);runs.append(value)

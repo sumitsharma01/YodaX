@@ -29,6 +29,10 @@ def timesfm_baselines(prices, config, root, only_latest=False):
             if not np.isfinite(window).all() or (window <= 0).any() or splits.ne(0).any():
                 continue
             date = frame.index[index]
+            if not only_latest and config.get('baseline_start') and date < pd.Timestamp(config['baseline_start']):
+                continue
+            if not only_latest and config.get('baseline_end') and date >= pd.Timestamp(config['baseline_end']):
+                continue
             digest = sha256(window.astype('<f8').tobytes() + f'{MODEL_REVISION}:{horizon}:{context}'.encode()).hexdigest()
             file = cache / f'{digest}.npy'
             if file.exists():

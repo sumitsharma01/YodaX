@@ -1,0 +1,249 @@
+{
+  "status": "completed_research_only",
+  "data_kind": "real",
+  "holdout": false,
+  "config": {
+    "start": "2023-01-01",
+    "horizon": 5,
+    "context": 256,
+    "seed": 42,
+    "stocks": [
+      "AAPL",
+      "MSFT",
+      "GOOGL",
+      "AMZN",
+      "NVDA",
+      "META",
+      "JPM",
+      "BAC",
+      "GS",
+      "JNJ",
+      "UNH",
+      "PG",
+      "WMT",
+      "HD",
+      "CAT",
+      "DE",
+      "XOM",
+      "CVX",
+      "FCX",
+      "NUE",
+      "TSLA",
+      "CL=F",
+      "HG=F"
+    ],
+    "market_context": [
+      "SPY",
+      "CL=F",
+      "BZ=F",
+      "HG=F"
+    ],
+    "coverage_notes": {
+      "oil": "Yahoo front-month WTI/Brent futures proxies; not spot or a roll-adjusted investable return series.",
+      "copper": "Yahoo front-month copper futures proxy; roll effects require review.",
+      "silicon": "Not collected: silicon metal vs polysilicon benchmark and licensed historical source unresolved.",
+      "lithium": "Not collected: grade, region and licensed historical source unresolved.",
+      "steel": "Not collected: regional HRC benchmark and licensed historical source unresolved; NUE is not a steel price substitute."
+    },
+    "validation_windows": [
+      [
+        "2025-09-01",
+        "2026-01-01"
+      ],
+      [
+        "2026-01-01",
+        "2026-07-01"
+      ]
+    ],
+    "holdout_start": "2026-07-01",
+    "event_lag_days": 2,
+    "bootstrap_block_sessions": 20,
+    "bootstrap_repetitions": 1000,
+    "include_symbol": true,
+    "baseline_start": "2025-01-01",
+    "baseline_end": "2026-07-01",
+    "study_note": "Exploratory wider-universe study. Evaluation dates overlap earlier two-stock studies. No pristine holdout claim. Futures use XNYS sampling; not physical demand or investment returns.",
+    "completed_futures_context": true
+  },
+  "folds": [
+    {
+      "start": "2025-09-01",
+      "end": "2026-01-01",
+      "split": {
+        "train_start": "2025-01-08",
+        "train_end": "2025-08-22",
+        "last_training_target": "2025-08-29",
+        "test_start": "2025-09-02",
+        "test_end": "2025-12-23",
+        "training_rows": 3075,
+        "test_rows": 1840
+      },
+      "metrics": [
+        {
+          "model": "event_adjusted",
+          "observations": 1840,
+          "dates": 80,
+          "mae_return_pp": 2.867270228451184,
+          "rmse_return_pp": 3.8488072706407506,
+          "direction_accuracy": 0.5423913043478261
+        },
+        {
+          "model": "market_adjusted",
+          "observations": 1840,
+          "dates": 80,
+          "mae_return_pp": 3.089797536493925,
+          "rmse_return_pp": 4.264443462857574,
+          "direction_accuracy": 0.4532608695652174
+        },
+        {
+          "model": "no_change",
+          "observations": 1840,
+          "dates": 80,
+          "mae_return_pp": 2.7960537773185075,
+          "rmse_return_pp": 3.831454779307802,
+          "direction_accuracy": 0.0005434782608695652
+        },
+        {
+          "model": "timesfm",
+          "observations": 1840,
+          "dates": 80,
+          "mae_return_pp": 2.8679977499431284,
+          "rmse_return_pp": 3.9205397179984383,
+          "direction_accuracy": 0.49782608695652175
+        }
+      ],
+      "uncertainty": {
+        "status": "computed",
+        "dates": 80,
+        "block_sessions": 20,
+        "valid_blocks": 61,
+        "mean_improvement_pp": 0.22252730804274098,
+        "ci95_pp": [
+          -0.11824544410819743,
+          0.6745618741356746
+        ],
+        "interpretation": "Positive favors candidate; dependence-aware interval, not proof of causation or profitability."
+      },
+      "comparisons": {
+        "event_vs_market": {
+          "status": "computed",
+          "dates": 80,
+          "block_sessions": 20,
+          "valid_blocks": 61,
+          "mean_improvement_pp": 0.22252730804274098,
+          "ci95_pp": [
+            -0.11824544410819743,
+            0.6745618741356746
+          ],
+          "interpretation": "Positive favors candidate; dependence-aware interval, not proof of causation or profitability."
+        }
+      }
+    },
+    {
+      "start": "2026-01-01",
+      "end": "2026-07-01",
+      "split": {
+        "train_start": "2025-01-08",
+        "train_end": "2025-12-23",
+        "last_training_target": "2025-12-31",
+        "test_start": "2026-01-02",
+        "test_end": "2026-06-23",
+        "training_rows": 5030,
+        "test_rows": 2714
+      },
+      "metrics": [
+        {
+          "model": "event_adjusted",
+          "observations": 2714,
+          "dates": 118,
+          "mae_return_pp": 3.8610692085170593,
+          "rmse_return_pp": 5.113319555929685,
+          "direction_accuracy": 0.5375829034635224
+        },
+        {
+          "model": "market_adjusted",
+          "observations": 2714,
+          "dates": 118,
+          "mae_return_pp": 4.013745359037474,
+          "rmse_return_pp": 5.218479312203845,
+          "direction_accuracy": 0.4819454679439941
+        },
+        {
+          "model": "no_change",
+          "observations": 2714,
+          "dates": 118,
+          "mae_return_pp": 3.815078907126819,
+          "rmse_return_pp": 5.006651086422323,
+          "direction_accuracy": 0.00036845983787767134
+        },
+        {
+          "model": "timesfm",
+          "observations": 2714,
+          "dates": 118,
+          "mae_return_pp": 4.0002572477977765,
+          "rmse_return_pp": 5.277597465234204,
+          "direction_accuracy": 0.48415622697126015
+        }
+      ],
+      "uncertainty": {
+        "status": "computed",
+        "dates": 118,
+        "block_sessions": 20,
+        "valid_blocks": 99,
+        "mean_improvement_pp": 0.15267615052041492,
+        "ci95_pp": [
+          0.06378271265041523,
+          0.23002209812029187
+        ],
+        "interpretation": "Positive favors candidate; dependence-aware interval, not proof of causation or profitability."
+      },
+      "comparisons": {
+        "event_vs_market": {
+          "status": "computed",
+          "dates": 118,
+          "block_sessions": 20,
+          "valid_blocks": 99,
+          "mean_improvement_pp": 0.15267615052041492,
+          "ci95_pp": [
+            0.06378271265041523,
+            0.23002209812029187
+          ],
+          "interpretation": "Positive favors candidate; dependence-aware interval, not proof of causation or profitability."
+        }
+      }
+    }
+  ],
+  "baseline_revisions": [
+    "1d952420fba87f3c6dee4f240de0f1a0fbc790e3"
+  ],
+  "created_at": "2026-10-25T10:43:17.828425+00:00",
+  "event_coverage_fraction": 0.9465811965811965,
+  "source_hashes": {
+    "prices.parquet": "e271e8accddaf9adada21bc0cf0880d10f91266d59cc503027d45ddea20a6cdd",
+    "baselines.parquet": "cfb469c74fb189b8ebfdcbe60cd552daf16b02df3606bd67cca6d6bbb33ab219",
+    "events.parquet": "54905d5721cb4a5e5817c05d9aeed2958df86a18fd8631c7c32b9992f3d2beed"
+  },
+  "code_hashes": {
+    "collect.py": "4517a0de4e6e52ebc77d68d33a9f8439824ea17d445a61676b73ad247a3e2f9e",
+    "baseline.py": "867908ab8e70af0636049b24226652692f990c72d960d4772c8fdf346225dd6f",
+    "__init__.py": "5c9c26e58fb261226dad2fba0b04fe3a44ef86739576282fc7cf962631cde7b5",
+    "features.py": "45433b22dcbaf9c1837e3ba5cddb799006ff8b11db1865f32a55b372ea34e4f0",
+    "model.py": "ccdf0dbdd1a37353bb99f3fc23bd8e3dd177d3f0e741fb6ad2440e1e8a535f74",
+    "readiness_audit.py": "e97f67c1f5fb1070f41a9803a909e86dac6c1d35018dc9ff93cbe785c3276755",
+    "evaluate.py": "7c88282cd27d209f8ed82281876910a94fbb2ccefa384bcf7620e021dd422509",
+    "exposures.py": "ca0ae589ff820f39b716deccc650cacb2f4af75575fcd67fccbcd434ad936c62",
+    "notebook.py": "008877f712767fbec02f5b2346facf2d89781eb395e7a93d2be545d3fc7a2b2e",
+    "broad.py": "c2b9bb237162ce976841e731dbedac5b15ef8a175fb586b4a80a4d6cd54e9f95",
+    "quality.py": "d654daee0fecdc5d30a8d1074b2e06571ed7b73796d00587db88e56a5e1c206a",
+    "__main__.py": "ae3dea93593f6bf7d3d85e8e1278ac9c73807114128a2ba8e5ae57f2822a1dbe",
+    "fixtures.py": "a9631ef2e852874c4387d86c9098279f7c140a44c486d499a54d6b0ded4cae70"
+  },
+  "limitations": [
+    "Retrospective price snapshots may contain vendor restatements.",
+    "Foundation-model pretraining overlap with historical test periods is unknown.",
+    "GDELT archive availability is a lag assumption, not verified publication time.",
+    "Country presence links, when enabled, come from dated disclosures; they are not quantitative economic weights or causal evidence.",
+    "Current stock universe has survivorship/selection bias.",
+    "No prospective evidence, automatic promotion, calibrated intervals, or trading-cost evaluation."
+  ]
+}

@@ -15,15 +15,32 @@ ALIASES = {'apple':'AAPL','microsoft':'MSFT','google':'GOOGL','alphabet':'GOOGL'
  'freeport':'FCX','nucor':'NUE','tesla':'TSLA','wti':'CL=F','copper':'HG=F'}
 
 
+def event_route(symbol, horizon):
+    """A checked-in frozen candidate defines coverage; never infer it from a headline."""
+    path=Path(__file__).resolve().parents[1]/'config/shadow-broad.json'
+    if path.exists():
+        cfg=json.loads(path.read_text())
+        if cfg.get('chat_enabled') and horizon==cfg['horizon_sessions'] and symbol in cfg['symbols']:
+            return {'candidate':cfg['candidate'],'route':'global_event_adjusted',
+                    'name':'TimesFM + global-event residual model','scope':'global event statistics'}
+    if symbol in ('AAPL','FCX') and horizon==5:
+        original=json.loads((Path(__file__).resolve().parents[1]/'config/shadow.json').read_text())
+        return {'candidate':original['candidate'],'route':'event_adjusted',
+                'name':'TimesFM + country-linked residual model','scope':'dated company country exposures'}
+    return None
+
+
 def coverage():
     config=json.loads((Path(__file__).resolve().parents[1]/'config/research.json').read_text())
-    return {'stocks':sorted(set(config['stocks'])|{c['symbol'] for c in COMPANIES}),
+    stocks=sorted(set(config['stocks'])|{c['symbol'] for c in COMPANIES})
+    return {'stocks':stocks,
         'additional_us_equities':'Ticker and exchange validated by the worker',
         'numerical_futures':FUTURES,
         'research_only':{'Brent oil':'Exchange session mapping not validated for numerical issuance',
                          'silicon':'No validated benchmark/history', 'lithium':'No validated benchmark/history',
                          'steel':'No validated benchmark/history','forex':'No numerical worker configured'},
-        'event_adjustment':{'symbols':['AAPL','FCX'],'horizon_sessions':5,'status':'experimental'},
+        'event_adjustment':{'symbols':[s for s in stocks+list(FUTURES) if event_route(s,5)],'horizon_sessions':5,'status':'experimental',
+                            'inputs':'Pinned TimesFM baseline, historical returns/volatility, market context and lagged GDELT global event statistics. Model route identifies country-linked versus global-only coverage.'},
         'baseline_horizon_sessions':[1,60],
         'commodity_horizon_basis':'US equity-session sampling grid; provider futures close must also be completed. Not exchange settlement prices.'}
 
@@ -52,7 +69,7 @@ def context(message, history, owner):
     with connect() as db:
         # Only immutable forecast evidence is exposed, never worker logs or credentials.
         try:
-            rows=db.execute("SELECT symbol,cutoff,target,model,issued_at,payload,actual,evaluation FROM shadow_predictions ORDER BY cutoff DESC LIMIT 120").fetchall()
+            rows=db.execute("SELECT candidate,symbol,cutoff,target,model,issued_at,payload,actual,evaluation FROM shadow_predictions ORDER BY cutoff DESC,issued_at DESC LIMIT 300").fetchall()
         except Exception:
             rows=[]
         seen=set()
@@ -61,7 +78,7 @@ def context(message, history, owner):
             seen.add((row['symbol'],row['model']))
             p=json.loads(row['payload'])
             result['saved_forecasts'].append({'symbol':row['symbol'],'horizon_sessions':5,'state':'scored' if row['actual'] is not None else 'pending',
-                'experimental':True,'model_variant':row['model'],'payload':{k:p.get(k) for k in ['previous','predicted','predicted_return','model_revision','feature_version','event_coverage','exposure_coverage']},
+                'experimental':True,'candidate':row['candidate'],'model_variant':row['model'],'payload':{k:p.get(k) for k in ['previous','predicted','predicted_return','model_revision','feature_version','event_coverage','exposure_coverage','unit','model_inputs','event_sources','event_lag_days','model_input_note']},
                 'cutoff':row['cutoff'],'target':row['target'],'issued_at':row['issued_at'],'actual':row['actual']})
     result['saved_forecasts']=result['saved_forecasts'][:18]
     return result

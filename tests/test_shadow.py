@@ -116,3 +116,17 @@ class ShadowAuthTests(unittest.TestCase):
         with patch('backend.shadow_api.setting',side_effect=lambda name: (self.token+'\n') if name=='SHADOW_ADMIN_TOKEN' else ''):
             result=self.client.post('/api/shadow/login',json={'token':self.token})
             self.assertEqual(result.status_code,200)
+
+class FuturesShadowTests(unittest.TestCase):
+    def test_futures_outcome_waits_for_futures_close_and_is_candidate_scoped(self):
+        import exchange_calendars as xc
+        db=sqlite3.connect(':memory:');db.row_factory=sqlite3.Row;store.schema(db)
+        cal=xc.get_calendar('XNYS');days=cal.sessions_in_range('2026-10-12','2026-10-19')
+        prices=pd.DataFrame({'date':days,'symbol':'HG=F','close':[100.,101.,102.,103.,104.,106.],'split':0.})
+        payload=dict(prospective=True,horizon_sessions=5,previous=100.,predicted_return=.05)
+        store.save_prediction(db,'broad','HG=F','2026-10-12','2026-10-19','event_adjusted','2026-10-12T23:30:00Z',payload,'2026-10-13T13:30:00Z')
+        close=xc.get_calendar('COMEX').session_close('2026-10-19')
+        self.assertEqual(store.score_pending(db,prices,now=close.isoformat(),candidate='broad'),0)
+        self.assertEqual(store.score_pending(db,prices,now=(close+pd.Timedelta(hours=2)).isoformat(),candidate='other'),0)
+        self.assertEqual(store.score_pending(db,prices,now=(close+pd.Timedelta(hours=2)).isoformat(),candidate='broad'),1)
+        db.close()

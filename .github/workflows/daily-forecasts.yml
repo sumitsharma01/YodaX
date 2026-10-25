@@ -61,3 +61,40 @@ jobs:
       - name: Attach available event-model forecasts to chat requests
         if: ${{ !cancelled() }}
         run: python -m backend.requested_forecasts
+  global_events:
+    name: Global-event chat beta
+    needs: forecast
+    if: ${{ !cancelled() && vars.YODAX_CLOUD_ENABLED != 'false' && vars.YODAX_GLOBAL_EVENTS_ENABLED != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      YODAX_STORAGE: postgres
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-shadow.txt
+      - run: pip install -r requirements-shadow.txt
+      - name: Verify frozen broader candidate
+        run: python -m backend.shadow_run --config config/shadow-broad.json --check
+      - name: Score and issue global-event beta forecasts
+        run: python -m backend.shadow_run --config config/shadow-broad.json
+      - name: Attach beta outputs to requested predictions
+        if: ${{ !cancelled() }}
+        run: python -m backend.requested_forecasts
+      - name: Retain replay inputs for thirty days
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-event-inputs-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 30
+          if-no-files-found: ignore
+          path: |
+            data/shadow-work/*/model-prices.parquet
+            data/shadow-work/*/baselines.parquet
+            data/shadow-work/*/events.parquet
+            data/shadow-work/*/event_coverage.json
+            data/shadow-work/*/price_coverage.json

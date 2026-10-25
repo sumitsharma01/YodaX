@@ -1,0 +1,89 @@
+{
+  "feature_version": "daily-v2-exposures",
+  "include_events": false,
+  "event_columns": [
+    "event_log_count_7d",
+    "material_conflict_share_7d",
+    "material_cooperation_share_7d",
+    "event_coverage_7d"
+  ],
+  "baseline_revisions": [
+    "1d952420fba87f3c6dee4f240de0f1a0fbc790e3"
+  ],
+  "data_kind": "real",
+  "training_start": "2025-01-08",
+  "training_end": "2026-06-23",
+  "last_training_target": "2026-06-30",
+  "rows": 7859,
+  "status": "research_candidate_not_approved_for_production",
+  "versions": {
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "joblib": "1.6.0"
+  },
+  "evaluation_report_sha256": "e4b2fcb41480ea0e58f4671822ddfbd9842b7e1e685124e83c3a788acbc1053c",
+  "deployment_role": "experimental_chat_beta_not_production_approved",
+  "config": {
+    "start": "2023-01-01",
+    "horizon": 5,
+    "context": 256,
+    "seed": 42,
+    "stocks": [
+      "AAPL",
+      "MSFT",
+      "GOOGL",
+      "AMZN",
+      "NVDA",
+      "META",
+      "JPM",
+      "BAC",
+      "GS",
+      "JNJ",
+      "UNH",
+      "PG",
+      "WMT",
+      "HD",
+      "CAT",
+      "DE",
+      "XOM",
+      "CVX",
+      "FCX",
+      "NUE",
+      "TSLA",
+      "CL=F",
+      "HG=F"
+    ],
+    "market_context": [
+      "SPY",
+      "CL=F",
+      "BZ=F",
+      "HG=F"
+    ],
+    "coverage_notes": {
+      "oil": "Yahoo front-month WTI/Brent futures proxies; not spot or a roll-adjusted investable return series.",
+      "copper": "Yahoo front-month copper futures proxy; roll effects require review.",
+      "silicon": "Not collected: silicon metal vs polysilicon benchmark and licensed historical source unresolved.",
+      "lithium": "Not collected: grade, region and licensed historical source unresolved.",
+      "steel": "Not collected: regional HRC benchmark and licensed historical source unresolved; NUE is not a steel price substitute."
+    },
+    "validation_windows": [
+      [
+        "2025-09-01",
+        "2026-01-01"
+      ],
+      [
+        "2026-01-01",
+        "2026-07-01"
+      ]
+    ],
+    "holdout_start": "2026-07-01",
+    "event_lag_days": 2,
+    "bootstrap_block_sessions": 20,
+    "bootstrap_repetitions": 1000,
+    "include_symbol": true,
+    "study_note": "Exploratory wider-universe study. Evaluation dates overlap earlier two-stock studies. No pristine holdout claim. Futures use XNYS sampling; not physical demand or investment returns.",
+    "completed_futures_context": true
+  },
+  "sha256": "ef03b87acc61119b84a0b2f114b97e44f914f50c21ef4893596b180517d1e066"
+}
