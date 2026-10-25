@@ -202,3 +202,55 @@ class ResearchTests(unittest.TestCase):
                 with self.assertRaises(HTTPException): research.local_only(request)
 
 if __name__=='__main__':unittest.main()
+
+class ModelEvidenceTests(unittest.TestCase):
+    def test_public_record_endpoint_excludes_private_and_operational_fields(self):
+        import json
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        from backend.core import connect
+        from backend.shadow_store import schema
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'evidence.sqlite3'
+            with connect(path) as db:
+                schema(db)
+                payload={'predicted':101.,'model_inputs':{'return_5':.01},'owner':'private-owner','run_id':'internal-run','exposure_sources':'internal-detail'}
+                db.execute('INSERT INTO shadow_predictions VALUES (?,?,?,?,?,?,?,NULL,NULL,NULL,NULL)',('test','HG=F','2026-10-23','2026-10-30','event_adjusted','2026-10-25T10:00:00Z',json.dumps(payload)))
+            app=FastAPI();app.include_router(research.router)
+            with patch('backend.core.connect',side_effect=lambda:connect(path)):
+                client=TestClient(app)
+                response=client.get('/api/research/model-evidence',params=dict(candidate='test',symbol='HG=F',cutoff='2026-10-23',model='event_adjusted'))
+                self.assertEqual(response.status_code,200)
+                self.assertEqual(response.json()['evidence']['predicted'],101.)
+                self.assertNotIn('private-owner',response.text)
+                self.assertNotIn('internal-run',response.text)
+                self.assertNotIn('internal-detail',response.text)
+                self.assertEqual(client.get('/api/research/model-evidence',params=dict(candidate='missing',symbol='HG=F',cutoff='2026-10-23',model='event_adjusted')).status_code,404)
+
+    def test_model_sources_are_numbered_without_exposing_private_requests(self):
+        from backend.market_context import model_sources
+        ctx={'saved_forecasts':[{'request_id':'private','symbol':'HG=F','payload':{'predicted':999}},
+            {'candidate':'test','symbol':'HG=F','cutoff':'2026-10-23','target':'2026-10-30',
+             'issued_at':'2026-10-25T10:00:00Z','model_variant':'event_adjusted','payload':{'predicted':101.,'unit':'USD per pound'}}]}
+        records=model_sources(ctx)
+        self.assertEqual(len(records),1)
+        self.assertEqual(records[0]['kind'],'model_output')
+        self.assertIn('symbol=HG%3DF',records[0]['url'])
+        self.assertNotIn('999',str(records))
+
+    @patch.object(research,'reserve')
+    @patch.object(research,'key',return_value='test-secret')
+    @patch.object(research.requests,'post')
+    def test_repair_with_no_evidence_does_not_demand_invented_citations(self,post,key,reserve):
+        import json
+        valid=copy.deepcopy(REPORT);valid['answer']='General principle.'
+        for node in valid['nodes']:
+            node['source_ids']=[]
+            if node['kind']=='evidence':node['kind']='mechanism'
+        good=response();good.json.return_value['candidates'][0]['content']['parts'][0]['text']=json.dumps(valid)
+        post.side_effect=[response(),good]
+        result=research.generate('Educational question',[])
+        self.assertEqual(result['answer'],'General principle.')
+        repair=post.call_args.kwargs['json']['contents'][0]['parts'][-1]['text']
+        self.assertIn('If it is empty, omit citations',repair)
+        self.assertNotIn('with citations [1]',repair)

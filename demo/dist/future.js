@@ -187,7 +187,7 @@
     report.queries.forEach((query, i) =>
       el("p", `${i + 1}. ${query}`, sources),
     );
-    el("h4", "Headline sources", sources);
+    el("h4", "Sources and model records", sources);
     const list = el("ol", "", sources);
     report.sources.forEach((source) => {
       const item = el("li", "", list);

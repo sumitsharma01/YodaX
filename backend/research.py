@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import requests
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Query
 from pydantic import BaseModel, Field
 from .core import ROOT, DATA
 
@@ -152,10 +152,12 @@ def generate(prompt, sources, progress=lambda stage: None):
     if not secret:
         raise HTTPException(503, 'Add your Gemini key to the local .env file first.')
     # URLs remain on the server: only compact, numbered headline evidence enters the model.
-    evidence = [{'id': i + 1, 'title': s['title'], 'date': s['published'], 'publisher': s['publisher']}
+    evidence = [{'id': i + 1, 'title': s['title'], 'date': s['published'], 'publisher': s['publisher'],
+                 'kind':s.get('kind','headline'),'detail':s.get('detail','Headline only; not a verified full article.')}
                 for i, s in enumerate(sources)]
     body = {'systemInstruction': {'parts': [{'text': SYSTEM}]},
-            'contents': [{'parts': [{'text': prompt + '\nHeadline evidence: ' + json.dumps(evidence)}]}],
+            'contents': [{'parts': [{'text': prompt + '\nNumbered evidence: ' + json.dumps(evidence) +
+                '\nCite model_output records for saved numerical forecasts. They are recorded model evidence, not news or proof of causation. Only use the supplied numbered IDs. If the evidence list is empty, do not use numeric citations or evidence nodes.'}]}],
             'generationConfig': {'maxOutputTokens': 3200, 'thinkingConfig': {'thinkingLevel': 'low'},
                                  'responseMimeType': 'application/json'}}
     for attempt in range(2):
@@ -188,12 +190,12 @@ def generate(prompt, sources, progress=lambda stage: None):
                 raise ValueError('Incomplete reply')
             raw = ''.join(p['text'] for p in candidate['content']['parts'] if 'text' in p and not p.get('thought'))
             return validate_result(json.loads(raw), sources)
-        except (KeyError, ValueError, IndexError, TypeError):
+        except (KeyError, ValueError, IndexError, TypeError) as exc:
             if attempt == 0:
                 progress('Checking evidence links and rebuilding the answer…')
                 body['contents'][0]['parts'].append({'text':
-                    'The previous response did not pass validation. Return a complete JSON report '
-                    'with citations [1] in the answer. Use exactly one outlook node. Every other '
+                    f'The previous response did not pass validation ({type(exc).__name__}: {str(exc)[:100]}). Return a complete JSON report '
+                    'using only IDs in the supplied evidence list. If it is empty, omit citations and use mechanism/risk/outlook nodes only. Use exactly one outlook node. Every other '
                     'node must have a directed path to that outlook. Evidence nodes must have '
                     'valid source_ids from the supplied evidence. Keep the answer and graph concise.'})
                 continue
@@ -265,7 +267,7 @@ def run_turn(turn_id, conversation_id, topic, message, owner='local'):
         with database() as db:
             previous = db.execute("SELECT question,result FROM turns WHERE conversation=? AND state='done' ORDER BY created DESC LIMIT 4", (conversation_id,)).fetchall()
         history = [{'user': r['question'], 'assistant': json.loads(r['result'])['answer']} for r in reversed(previous)]
-        from .market_context import context
+        from .market_context import context, model_sources
         progress('Checking market coverage and saved model forecasts…')
         market_context=context(message,history,owner)
         progress('Finding recent headlines…')
@@ -276,6 +278,10 @@ def run_turn(turn_id, conversation_id, topic, message, owner='local'):
         except HTTPException:
             sources = []
             feed_note = 'Recent headlines were unavailable. This answer can explain general principles, but cannot verify current market conditions.'
+        saved_sources=model_sources(market_context)
+        sources.extend(saved_sources)
+        if feed_note and saved_sources:
+            feed_note='Recent headlines were unavailable. This answer uses saved model forecasts and their recorded inputs; it does not verify new market developments.'
         initial_count = len(sources)
         prompt = f'Date: {today()}. Optional market focus: {json.dumps(topic)}. Current research query: {json.dumps(search)}. Conversation: {json.dumps(history)}. User: {json.dumps(message)}'
         prompt += '\nServer-verified market_context: '+json.dumps(market_context,allow_nan=False)
@@ -325,6 +331,29 @@ def predictions(request: Request):
     local_only(request)
     from .prediction_requests import listing
     return {'predictions': listing(getattr(request.state, 'owner', 'local'))}
+
+
+@router.get('/model-evidence')
+def model_evidence(candidate: str=Query(min_length=1,max_length=80),
+                   symbol: str=Query(min_length=1,max_length=15),
+                   cutoff: str=Query(pattern=r'^\d{4}-\d{2}-\d{2}$'),
+                   model: str=Query(pattern=r'^(timesfm|market_adjusted|event_adjusted|no_change)$')):
+    # This public route exposes only the same shared shadow evidence as chat.
+    # It never looks up conversations, owner identifiers or private requests.
+    from .core import connect
+    db=connect()
+    try:
+        row=db.execute('SELECT issued_at,target,payload FROM shadow_predictions WHERE candidate=? AND symbol=? AND cutoff=? AND model=?',
+                       (candidate,symbol,cutoff,model)).fetchone()
+    finally:
+        db.close()
+    if not row:
+        raise HTTPException(404,'Saved model evidence not found')
+    payload=json.loads(row['payload'])
+    allowed=['previous','predicted','predicted_return','model_revision','feature_version','artifact_sha',
+             'unit','model_inputs','event_sources','event_lag_days','model_input_note','prices_sha','events_sha']
+    return dict(candidate=candidate,symbol=symbol,cutoff=cutoff,target=row['target'],model=model,
+                issued_at=row['issued_at'],experimental=True,evidence={k:payload.get(k) for k in allowed})
 
 
 @router.get('/status')

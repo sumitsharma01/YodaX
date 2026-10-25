@@ -2,6 +2,7 @@
 import json
 import re
 from pathlib import Path
+from urllib.parse import urlencode
 from .core import connect, COMPANIES
 
 FUTURES = {
@@ -82,3 +83,20 @@ def context(message, history, owner):
                 'cutoff':row['cutoff'],'target':row['target'],'issued_at':row['issued_at'],'actual':row['actual']})
     result['saved_forecasts']=result['saved_forecasts'][:18]
     return result
+
+
+def model_sources(market_context):
+    """Number saved public model records alongside news without inventing citations."""
+    from .storage import setting
+    origin=(setting('PUBLIC_ORIGIN') or setting('RENDER_EXTERNAL_URL') or 'http://127.0.0.1:8000').rstrip('/')
+    sources=[]
+    for record in market_context['saved_forecasts']:
+        if not all(record.get(k) for k in ('candidate','symbol','cutoff','model_variant')):
+            continue  # Owner-private requests are not public evidence URLs.
+        payload=record['payload']
+        query=urlencode(dict(candidate=record['candidate'],symbol=record['symbol'],cutoff=record['cutoff'],model=record['model_variant']))
+        sources.append(dict(kind='model_output',
+            title=f"Saved {record['symbol']} {record['model_variant']} forecast; target {record['target']}",
+            url=f'{origin}/api/research/model-evidence?{query}',published=record['issued_at'],publisher='YodaX model ledger',
+            detail=f"Cutoff {record['cutoff']}; predicted {payload.get('predicted')} {payload.get('unit') or 'USD per share'}. Experimental model output, not an observed price or verified economic cause."))
+    return sources
