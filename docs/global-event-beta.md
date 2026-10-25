@@ -4,7 +4,7 @@ YodaX now has a frozen five-session event-aware candidate for the 20-stock resea
 
 ## What changed
 
-Gemini resolves the asset and horizon, researches the question and queues a typed request. The numerical worker independently fetches prices and GDELT event archives. It uses the same deterministic features and fitted preprocessing as training. It saves the original prediction, model version, target, input values and archive references. Chat can explain those numbers and display an expandable input panel beside the mind map.
+Gemini resolves the asset and horizon, researches the question and queues a typed request. The numerical worker independently fetches prices and GDELT event archives. It uses the same deterministic features and fitted preprocessing as training. It saves the original prediction, model version, target, input values and archive references. Chat can explain those numbers and display an expandable input panel beside the mind map. Saved public model outputs have their own evidence links, distinct from news citations. Comparator descriptions show only the inputs each model uses; no change copies the last close.
 
 Eligible five-session requests are pinned to `global-v1-20261025`. Other supported horizons and additional US equities use TimesFM. Requests for physical demand are research scenarios, not price forecasts. Missing current event inputs leave an event request queued; the worker does not silently substitute another model.
 

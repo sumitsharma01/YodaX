@@ -299,7 +299,7 @@ def run_turn(turn_id, conversation_id, topic, message, owner='local'):
                 extra = news(query)
             except HTTPException:
                 extra = []
-                followup_note = 'The follow-up feed was unavailable; this answer uses the initial headlines.'
+                followup_note = 'The follow-up feed was unavailable; this answer uses the initial evidence.'
             if extra:
                 seen = {s['url'] for s in sources}
                 for source in extra:
