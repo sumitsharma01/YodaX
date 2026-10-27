@@ -57,7 +57,8 @@ def run(backtest_days=10):
             raise ValueError(f'{symbol}: invalid date order')
         closes = frame['Close'].to_numpy(dtype=np.float64)
         if len(closes) < 256+backtest_days or not np.isfinite(closes).all() or (closes<=0).any():
-            raise ValueError(f'{symbol}: insufficient or invalid price history')
+            raise ValueError(f'{symbol}: invalid history: rows={len(closes)}, required={256+backtest_days}, '
+                             f'nonfinite={int((~np.isfinite(closes)).sum())}, nonpositive={int((closes<=0).sum())}')
         expected = calendar.sessions_in_range(frame.index[-256-backtest_days], cutoff)
         if list(expected.date) != list(frame.index[-len(expected):].date):
             raise ValueError(f'{symbol}: missing trading sessions in input window')

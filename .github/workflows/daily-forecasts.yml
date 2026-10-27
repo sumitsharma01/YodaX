@@ -31,7 +31,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.lock.txt
       - run: pip install -r requirements.lock.txt
-      - run: python -m backend.cloud_daily
+      - run: python -m backend.retry_job backend.cloud_daily
       - name: Issue and score chat-requested predictions
         if: ${{ !cancelled() }}
         run: python -m backend.requested_forecasts
@@ -57,7 +57,7 @@ jobs:
       - name: Verify frozen candidate
         run: python -m backend.shadow_run --check
       - name: Score and issue prospective shadow forecasts
-        run: python -m backend.shadow_run
+        run: python -m backend.retry_job backend.shadow_run
       - name: Attach available event-model forecasts to chat requests
         if: ${{ !cancelled() }}
         run: python -m backend.requested_forecasts
@@ -81,7 +81,7 @@ jobs:
       - name: Verify frozen broader candidate
         run: python -m backend.shadow_run --config config/shadow-broad.json --check
       - name: Score and issue global-event beta forecasts
-        run: python -m backend.shadow_run --config config/shadow-broad.json
+        run: python -m backend.retry_job backend.shadow_run --config config/shadow-broad.json
       - name: Attach beta outputs to requested predictions
         if: ${{ !cancelled() }}
         run: python -m backend.requested_forecasts

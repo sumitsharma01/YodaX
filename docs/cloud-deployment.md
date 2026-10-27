@@ -14,7 +14,7 @@ The application uses a private `yodax` schema. GitHub Actions needs its own `DAT
 
 ## Daily schedule
 
-The `Daily forecasts` workflow runs at 21:15, 22:15 and 23:15 UTC on weekdays, with a 06:15 UTC catch-up Tuesday through Saturday. These are UTC times; local time changes with daylight saving. Calendar and cutoff checks decide whether a session needs processing. GitHub scheduling can be delayed.
+The `Daily forecasts` workflow runs at 21:15, 22:15 and 23:15 UTC on weekdays, with a 06:15 UTC catch-up Tuesday through Saturday. These are UTC times; local time changes with daylight saving. Failed forecast and candidate workers retry up to three times, with 30 seconds between attempts. Each attempt repeats all calendar and input checks; persistent invalid data still fails the job. Calendar and cutoff checks decide whether a session needs processing. GitHub scheduling can be delayed.
 
 | Job | Purpose | Disable variable |
 | --- | --- | --- |
