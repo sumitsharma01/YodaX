@@ -28,3 +28,11 @@ class RetryJobTests(unittest.TestCase):
         self.assertEqual(run(['worker']), 0)
         execute.assert_called_once_with(['worker'], check=False)
         sleep.assert_not_called()
+
+    @patch('backend.retry_job.time.sleep')
+    @patch('backend.retry_job.subprocess.run')
+    def test_provisional_close_defers_without_repeating_same_request(self, execute, sleep):
+        execute.return_value = CompletedProcess([], 75)
+        self.assertEqual(run(['worker']), 0)
+        self.assertEqual(execute.call_count, 1)
+        sleep.assert_not_called()

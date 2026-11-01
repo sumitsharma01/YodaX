@@ -7,6 +7,9 @@ import time
 def run(command, attempts=3, delay=30):
     for attempt in range(1, attempts + 1):
         result = subprocess.run(command, check=False)
+        if result.returncode == 75:
+            print('::warning::Daily close not yet available. Deferred to the next scheduled run; no forecast was published.', flush=True)
+            return 0
         if result.returncode == 0:
             return 0
         if attempt < attempts:
@@ -19,4 +22,4 @@ def run(command, attempts=3, delay=30):
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         raise SystemExit('Usage: python -m backend.retry_job module [arguments]')
-    raise SystemExit(run([sys.executable, '-m', *sys.argv[1:]]))
+    raise SystemExit(run([sys.executable, '-m', 'backend.scheduled_worker', *sys.argv[1:]]))

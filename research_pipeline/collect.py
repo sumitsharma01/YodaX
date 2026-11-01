@@ -7,6 +7,7 @@ from pathlib import Path
 import zipfile
 import pandas as pd
 import requests
+from backend.price_feed import daily_history, require_ready_close, PendingDailyClose
 
 
 def write_json(path, value):
@@ -27,8 +28,9 @@ def collect_prices(symbols, start, end, root):
     fetched = datetime.now(timezone.utc).isoformat()
     for symbol in symbols:
         try:
-            raw = yf.Ticker(symbol).history(start=start, end=end, auto_adjust=False,
+            raw = daily_history(yf.Ticker(symbol),start=start, end=end, auto_adjust=False,
                                             actions=True, raise_errors=True, timeout=30)
+            require_ready_close(raw, end)
             if raw.empty:
                 raise ValueError('Empty response')
             raw.index = raw.index.tz_localize(None).normalize()
@@ -46,6 +48,8 @@ def collect_prices(symbols, start, end, root):
                 last=str(frame.date.max().date()), rows=len(frame), sha256=digest,
                 raw_path=str(file), fetched_at=fetched, source='Yahoo Finance via yfinance',
                 caveat='Retrospective vendor snapshot, not an archived point-in-time price feed.'))
+        except PendingDailyClose:
+            raise
         except Exception as exc:
             coverage.append(dict(symbol=symbol, status='failed', error=type(exc).__name__, message=str(exc)))
         print(symbol, coverage[-1]['status'], flush=True)

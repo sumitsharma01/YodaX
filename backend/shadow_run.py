@@ -156,8 +156,10 @@ def run(check=False, issue=True, config_path=None):
             # Preserve a recorded partial run and any previously saved successful predictions.
             state=db.execute('SELECT status FROM shadow_runs WHERE id=?',(run_id,)).fetchone()
             if state and state['status']=='running':
-                finish_run(db,run_id,str(cutoff.date()) if cutoff is not None else None,'failed',
-                    dict(error_type=type(exc).__name__,reason='Shadow worker failed; inspect job logs. Public forecasts are unaffected.'))
+                from .price_feed import PendingDailyClose
+                finish_run(db,run_id,str(cutoff.date()) if cutoff is not None else None,
+                    'skipped' if isinstance(exc, PendingDailyClose) else 'failed',
+                    dict(error_type=type(exc).__name__,reason=str(exc) if isinstance(exc, PendingDailyClose) else 'Shadow worker failed; inspect job logs. Public forecasts are unaffected.'))
         raise
 
 

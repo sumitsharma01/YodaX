@@ -41,3 +41,24 @@ For private model evaluation, configure `SHADOW_ADMIN_TOKEN` and open `/model-ev
 5. For chat failures, distinguish Gemini quota/timeouts from unavailable numerical outputs. Retry research only after the underlying problem clears.
 
 Never fix a stale date by changing timestamps or overwriting a forecast. Preserve the last valid result, record the failure and rerun the appropriate worker. See [system design](system-design.md) for request boundaries and [release guidance](../CONTRIBUTING.md) for version control.
+
+### Missing closing prices in the overnight feed
+
+Some overnight Yahoo responses contain volume but no closing price for the latest
+session. The October 29 failed run retained this evidence for all 22 equities and
+SPY in its replay inputs; the later catch-up succeeded. Retrying the same long
+history immediately did not resolve it.
+
+The collectors now try a separate seven-day daily query for that final bar. They
+accept a complete, valid bar from the provider, never an estimated or carried-forward
+close. Older gaps and invalid data still fail validation.
+
+If the final close is still missing, the scheduled worker records **Awaiting closing
+prices** in the Actions summary and leaves existing forecasts intact. The next
+scheduled run tries again. This is a deferred run, not a successful forecast update.
+Within one hour of the next US market open, the same missing close becomes a hard
+failure so a missed update remains visible. GitHub can delay scheduled runs; this
+is not a guarantee of exact execution time. The existing catch-up schedule remains
+in place. Check the saved session cutoff as well as the Actions status.
+
+The model, historical predictions, training features and database schema are unchanged.

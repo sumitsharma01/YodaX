@@ -14,6 +14,7 @@ import exchange_calendars as xcals
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from .price_feed import daily_history, require_ready_close
 from .learning import schema as learning_schema, advance
 from .core import COMPANIES, DATA, MODEL_ID, MODEL_REVISION, connect, context_for, metrics, save_forecast
 
@@ -45,10 +46,11 @@ def run(backtest_days=10):
     for company in COMPANIES:
         symbol = company['symbol']
         print(f'Fetching {symbol} through {cutoff.date()}', flush=True)
-        frame = yf.Ticker(symbol).history(
+        frame = daily_history(yf.Ticker(symbol),
             start=str((cutoff-pd.Timedelta(days=800)).date()),
             end=str((cutoff+pd.Timedelta(days=1)).date()),
             auto_adjust=False, actions=True, raise_errors=True, timeout=30)
+        require_ready_close(frame, str((cutoff+pd.Timedelta(days=1)).date()))
         frame.index = frame.index.tz_localize(None).normalize()
         frame = frame.loc[frame.index <= cutoff.tz_localize(None)]
         if frame.empty or frame.index[-1].date() != cutoff.date():
