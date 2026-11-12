@@ -58,43 +58,55 @@ def schema(db):
       PRIMARY KEY(symbol,revision,version));
     ''')
 
-def advance(db, snapshot, revision, now):
+def _advance(db, snapshot, revision, now, learner):
+    version = learner.VERSION
     symbol=snapshot['symbol']
-    stored=db.execute('SELECT payload FROM learning_state WHERE symbol=? AND revision=? AND version=?', (symbol,revision,VERSION)).fetchone()
-    state=json.loads(stored['payload']) if stored else initial_state()
+    stored=db.execute('SELECT payload FROM learning_state WHERE symbol=? AND revision=? AND version=?', (symbol,revision,version)).fetchone()
+    state=json.loads(stored['payload']) if stored else learner.initial_state()
     # Joining only prospective rows makes historical test data ineligible for learning.
     rows=db.execute('''SELECT a.*, f.actual AS outcome FROM adaptive_forecasts a
       JOIN forecasts f ON f.symbol=a.symbol AND f.target=a.target AND f.model_revision=a.revision
       AND f.kind='prospective' WHERE a.symbol=? AND a.revision=? AND a.version=?
       AND a.evaluated_at IS NULL AND f.actual IS NOT NULL AND f.target<=?
-      ORDER BY a.target''',(symbol,revision,VERSION,snapshot['forecast']['cutoff'])).fetchall()
+      ORDER BY a.target''',(symbol,revision,version,snapshot['forecast']['cutoff'])).fetchall()
     for row in rows:
         prediction=json.loads(row['payload'])
         result=score(row['previous'],prediction['predicted'],row['outcome'],prediction['scale'])
         result['raw']=score(row['previous'],prediction['experts'][0],row['outcome'],prediction['scale'])
         result['state_before']=json.loads(json.dumps(state))
-        state=update(state,prediction,row['outcome'],row['previous'])
+        state=learner.update(state,prediction,row['outcome'],row['previous'])
         result['state_after']=json.loads(json.dumps(state))
         db.execute('UPDATE adaptive_forecasts SET evaluated_at=?,actual=?,result=? WHERE symbol=? AND target=? AND revision=? AND version=?',
-                   (now,row['outcome'],json.dumps(result),symbol,row['target'],revision,VERSION))
-    db.execute('INSERT OR REPLACE INTO learning_state VALUES (?,?,?,?)',(symbol,revision,VERSION,json.dumps(state)))
+                   (now,row['outcome'],json.dumps(result),symbol,row['target'],revision,version))
+    db.execute('INSERT OR REPLACE INTO learning_state VALUES (?,?,?,?)',(symbol,revision,version,json.dumps(state)))
     forecast=snapshot['forecast']
-    prediction=issue(forecast['previous'],forecast['predicted'],scale_from_history(snapshot['history']),state)
+    prediction=learner.issue(forecast['previous'],forecast['predicted'],scale_from_history(snapshot['history']),state)
     db.execute('INSERT OR IGNORE INTO adaptive_forecasts VALUES (?,?,?,?,?,?,?,NULL,NULL,NULL)',
-               (symbol,forecast['target'],revision,VERSION,now,forecast['previous'],json.dumps(prediction)))
+               (symbol,forecast['target'],revision,version,now,forecast['previous'],json.dumps(prediction)))
     frozen=db.execute('SELECT * FROM adaptive_forecasts WHERE symbol=? AND target=? AND revision=? AND version=?',
-                      (symbol,forecast['target'],revision,VERSION)).fetchone()
+                      (symbol,forecast['target'],revision,version)).fetchone()
     snapshot['adaptive']=dict(json.loads(frozen['payload']),created_at=frozen['created_at'],state=state)
     outcomes=db.execute('SELECT * FROM adaptive_forecasts WHERE symbol=? AND revision=? AND version=? AND evaluated_at IS NOT NULL ORDER BY target DESC',
-                        (symbol,revision,VERSION)).fetchall()
+                        (symbol,revision,version)).fetchall()
     snapshot['learning_results']=[dict(target=r['target'],actual=r['actual'],previous=r['previous'],
         predicted=json.loads(r['payload'])['predicted'],**json.loads(r['result'])) for r in outcomes]
     for r in snapshot['records']:
         if r['kind']=='prospective':
             saved=db.execute('SELECT payload FROM adaptive_forecasts WHERE symbol=? AND target=? AND revision=? AND version=?',
-                             (symbol,r['target'],revision,VERSION)).fetchone()
+                             (symbol,r['target'],revision,version)).fetchone()
             scale=json.loads(saved['payload'])['scale'] if saved else None
         else:
             index=snapshot['dates'].index(r['target']) if r['target'] in snapshot['dates'] else 0
             scale=scale_from_history(snapshot['history'][:index]) if index>=21 else None
         r['scoring']=score(r['previous'],r['predicted'],r['actual'],scale) if scale else None
+
+
+def advance(db, snapshot, revision, now):
+    import copy
+    import sys
+    from . import learning_candidate
+    _advance(db, snapshot, revision, now, sys.modules[__name__])
+    candidate = copy.deepcopy(snapshot)
+    _advance(db, candidate, revision, now, learning_candidate)
+    snapshot['adaptive_candidate'] = candidate['adaptive']
+    snapshot['candidate_results'] = candidate['learning_results']
